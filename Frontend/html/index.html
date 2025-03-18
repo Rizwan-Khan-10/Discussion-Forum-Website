@@ -4,8 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-    
+<body class="bg-gray-900 text-white">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-950 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-white">Forum</a>
+            <ul class="flex space-x-6">
+                <li><a href="#about" class="text-gray-400 hover:text-white transition">About</a></li>
+                <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                <li><a href="#" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Full Screen) -->
+    <section class="h-screen flex flex-col items-center justify-center text-center bg-gray-950">
+        <h1 class="text-6xl font-bold">Welcome to the Discussion Forum</h1>
+        <p class="text-gray-400 mt-4 text-lg">Engage, Learn & Share Knowledge with Experts.</p>
+
+        <!-- Search Bar -->
+        <div class="mt-6 flex w-full max-w-lg">
+            <input type="text" placeholder="Search topics..." class="w-full p-4 rounded-l bg-gray-800 text-gray-200 focus:outline-none">
+            <button class="bg-blue-700 px-6 rounded-r text-white hover:bg-blue-800 transition">Search</button>
+        </div>
+
+        <!-- CTA -->
+        <a href="#" class="mt-6 px-6 py-3 bg-blue-700 text-lg font-semibold rounded hover:bg-blue-800 transition">Join Now</a>
+    </section>
+
+    <!-- About Website -->
+    <section id="about" class="container mx-auto py-20">
+        <h2 class="text-5xl font-bold text-center">About Discussion Forum</h2>
+        <p class="text-gray-400 text-lg mt-6 text-center max-w-3xl mx-auto">
+            Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you will find engaging discussions on technology, gaming, science, and much more.
+        </p>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="container mx-auto py-20 bg-gray-800 rounded-lg">
+        <h2 class="text-5xl font-bold text-center">Features</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">Real-time Discussions</h3>
+                <p class="text-gray-400 mt-2">Engage in live conversations with experts & peers.</p>
+            </div>
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">Secure & Private</h3>
+                <p class="text-gray-400 mt-2">We prioritize security and keep discussions safe.</p>
+            </div>
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">User-friendly Interface</h3>
+                <p class="text-gray-400 mt-2">A smooth & easy-to-use experience for all users.</p>
+            </div>
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">Notifications & Updates</h3>
+                <p class="text-gray-400 mt-2">Stay updated with the latest discussions.</p>
+            </div>
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">Topic Categorization</h3>
+                <p class="text-gray-400 mt-2">Find relevant discussions quickly with categories.</p>
+            </div>
+            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold">Mobile Friendly</h3>
+                <p class="text-gray-400 mt-2">Optimized for all devices and screen sizes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us -->
+    <section id="contact" class="container mx-auto py-20">
+        <h2 class="text-5xl font-bold text-center">Contact Us</h2>
+        <form class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg mt-10">
+            <input type="text" placeholder="Your Name" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none">
+            <input type="email" placeholder="Your Email" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none">
+            <textarea placeholder="Your Message" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none"></textarea>
+            <button class="w-full bg-blue-600 p-4 rounded-lg text-white hover:bg-blue-700 transition">Send Message</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 p-6 text-center text-gray-400">
+        <p>&copy; 2025 Discussion Forum. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
