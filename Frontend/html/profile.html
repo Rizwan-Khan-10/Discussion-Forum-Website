@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Discussion Forum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-600 p-4 text-white">
+        <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-semibold">Discussion Forum</a>
+            <div>
+                <!-- Correct link to notifications.html -->
+                <a href="notifications.html" class="text-white hover:text-gray-200 mr-4">Notifications</a>
+                <a href="login.html" class="text-white hover:text-gray-200">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Section -->
+    <div class="max-w-screen-lg mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">My Profile</h2>
+
+        <form action="" method="POST" class="space-y-6">
+
+            <!-- Profile Picture Section -->
+            <div class="flex items-center space-x-4">
+                <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200" alt="Profile Picture" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <label for="profile-picture" class="text-sm font-semibold text-gray-600">Change Profile Picture</label>
+                    <input type="file" id="profile-picture" name="profile-picture" class="mt-2 text-blue-500 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Username Section -->
+            <div>
+                <label for="username" class="block text-sm font-semibold text-gray-600">Username</label>
+                <input type="text" id="username" name="username" value="" class="mt-2 p-2 w-full border border-gray-300 rounded-md">
+            </div>
+
+            <!-- Email Section -->
+            <div>
+                <label for="email" class="block text-sm font-semibold text-gray-600">Email Address</label>
+                <input type="email" id="email" name="email" value="" class="mt-2 p-2 w-full border border-gray-300 rounded-md">
+            </div>
+
+            <!-- Bio Section -->
+            <div>
+                <label for="bio" class="block text-sm font-semibold text-gray-600">Bio</label>
+                <textarea id="bio" name="bio" rows="4" class="mt-2 p-2 w-full border border-gray-300 rounded-md"></textarea>
+            </div>
+
+            <!-- Save Changes Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
+            </div>
+        </form>
+
+        <!-- Link to Notifications -->
+        <div class="mt-6 text-center">
+            <a href="notifications.html" class="text-blue-500 hover:text-blue-700 text-sm">Go to Notifications</a>
+        </div>
+    </div>
+
+</body>
+</html>
