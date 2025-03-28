@@ -11,11 +11,11 @@ class Post(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     category_id = Column(String, ForeignKey("categories.category_id"), nullable=False)
-    upvotes = Column(Integer, default=0)
-    downvotes = Column(Integer, default=0)
-    comments = Column(Integer, default=0)
-    is_pinned = Column(Boolean, default=False)
-    is_locked = Column(Boolean, default=False)
+    upvotes = Column(String, nullable=True)
+    downvotes = Column(String, nullable=True)
+    comments = Column(String, nullable=True)
+    is_pinned = Column(String, default=False)
+    is_locked = Column(String, default=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
     
@@ -24,4 +24,4 @@ class Post(Base):
     comments = relationship("Comment", back_populates="post")
     saved_threads = relationship("SavedThread", back_populates="post")
 
-__all__ = [ "Post"]
+__all__ = ["Post"]

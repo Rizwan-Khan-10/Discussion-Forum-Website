@@ -1,7 +1,6 @@
 import os
 import datetime
 import jwt
-from fastapi import HTTPException, Response
 from sqlalchemy.orm import Session
 from models.user import User
 from middlewares.encryption import EncryptionMiddleware  

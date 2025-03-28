@@ -1,12 +1,12 @@
-import random
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from models.post import Post
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
 from pydantic import BaseModel
-from datetime import datetime
-
+import datetime
+from middlewares.encryption import EncryptionMiddleware
+from middlewares.decryption import DecryptionMiddleware
 
 class PostRequest(BaseModel):
     user_id: str
@@ -14,32 +14,29 @@ class PostRequest(BaseModel):
     content: str
     category_id: str
 
-
 class UpdatePostRequest(BaseModel):
     title: str = None
     content: str = None
 
-
 async def create_post(request: PostRequest, db: Session):
     try:
+        encrypted_data = EncryptionMiddleware.encrypt(request.model_dump())
         new_post = Post(
-            user_id=request.user_id,
-            title=request.title,
-            content=request.content,
-            category_id=request.category_id,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            user_id=encrypted_data.get("user_id"),
+            title=encrypted_data.get("title"),
+            content=encrypted_data.get("content"),
+            category_id=encrypted_data.get("category_id"),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
+            updated_at=datetime.datetime.now(datetime.timezone.utc)
         )
         db.add(new_post)
         db.commit()
         db.refresh(new_post)
 
         return APIResponse.success(data=new_post, message="Post created successfully.")
-
     except Exception as e:
         db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
 
 async def get_post_by_id(post_id: str, db: Session):
     try:
@@ -47,11 +44,21 @@ async def get_post_by_id(post_id: str, db: Session):
         if not post:
             raise APIError(status_code=404, detail="Post not found.")
 
-        return APIResponse.success(data=post, message="Post retrieved successfully.")
+        decrypted_data = DecryptionMiddleware.decrypt({
+            "user_id": post.user_id,
+            "title": post.title,
+            "content": post.content,
+            "category_id": post.category_id
+        })
 
+        post.user_id = decrypted_data["user_id"]
+        post.title = decrypted_data["title"]
+        post.content = decrypted_data["content"]
+        post.category_id = decrypted_data["category_id"]
+
+        return APIResponse.success(data=post, message="Post retrieved successfully.")
     except Exception as e:
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
 
 async def update_post(post_id: str, request: UpdatePostRequest, db: Session):
     try:
@@ -59,19 +66,20 @@ async def update_post(post_id: str, request: UpdatePostRequest, db: Session):
         if not post:
             raise APIError(status_code=404, detail="Post not found.")
 
-        post.title = request.title or post.title
-        post.content = request.content or post.content
-        post.updated_at = datetime.utcnow()
+        request_data = request.model_dump(exclude_unset=True)
+        encrypted_data = EncryptionMiddleware.encrypt(request_data)
 
+        for key, value in encrypted_data.items():
+            setattr(post, key, value)
+
+        post.updated_at = datetime.datetime.utcnow()
         db.commit()
         db.refresh(post)
 
         return APIResponse.success(data=post, message="Post updated successfully.")
-
     except Exception as e:
         db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
 
 async def pin_post(post_id: str, is_pinned: bool, db: Session):
     try:

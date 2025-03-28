@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from db.connection import get_db
 from controllers.user_controller import (
     create_user_profile, get_user_profile, update_user_profile, 
-    delete_user_profile, follow_user
+    delete_user_profile
 )
 from pydantic import BaseModel
 
@@ -31,7 +31,3 @@ async def update_profile(user_id: str, request: UserProfileRequest, db: Session 
 @profile_router.delete("/deleteProfile")
 async def delete_profile(user_id: str, db: Session = Depends(get_db)):
     return await delete_user_profile(user_id, db)
-
-@profile_router.post("/follow")
-async def follow(user_id: str, follow_id: str, db: Session = Depends(get_db)):
-    return await follow_user(user_id, follow_id, db)

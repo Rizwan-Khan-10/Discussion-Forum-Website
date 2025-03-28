@@ -9,7 +9,7 @@ class Category(Base):
     category_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     category_name = Column(String, unique=True, nullable=False)
     description = Column(Text, nullable=True)
-    total_posts = Column(Integer, default=0)
+    total_posts = Column(String, default=0)
     
     posts = relationship("Post", back_populates="category")
 

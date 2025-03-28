@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Text, Boolean, ForeignKey
+from sqlalchemy import Column, String, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from base import Base  
 
@@ -8,16 +8,16 @@ class UserProfile(Base):
     user_id = Column(String, ForeignKey("users.user_id"), primary_key=True)
     bio = Column(Text, nullable=True)
     img = Column(String, nullable=True)
-    followers = Column(Integer, default=0)
-    following = Column(Integer, default=0)
-    total_posts = Column(Integer, default=0)
-    total_upvotes = Column(Integer, default=0)
-    total_downvotes = Column(Integer, default=0)
-    reputation = Column(Integer, default=0)
-    blockUser = Column(Boolean, default=False)
-    blockCommunity = Column(Boolean, default=False)
-    blockPost = Column(Boolean, default=False)
+    followers = Column(String, nullable=True)
+    following = Column(String, nullable=True)
+    total_posts = Column(String, nullable=True)
+    total_upvotes = Column(String, nullable=True)
+    total_downvotes = Column(String, nullable=True)
+    reputation = Column(String, nullable=True)
+    blockUser = Column(String, nullable=True)
+    blockCommunity = Column(String, nullable=True)
+    blockPost = Column(String, nullable=True)
     
     user = relationship("User", back_populates="profile")
 
-__all__ = [ "UserProfile"]
+__all__ = ["UserProfile"]
