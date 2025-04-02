@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from models.report import Report
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
+from middlewares.encryption import EncryptionMiddleware
 from pydantic import BaseModel
 import uuid
 from datetime import datetime
@@ -15,12 +16,14 @@ class ReportRequest(BaseModel):
 
 async def add_report(request: ReportRequest, db: Session):
     try:
+        encrypted_reason = EncryptionMiddleware.encrypt({"reason": request.reason})["reason"]
+
         new_report = Report(
             report_id=str(uuid.uuid4()),
             reported_by=request.reported_by,
             target_type=request.target_type,
             target_id=request.target_id,
-            reason=request.reason,
+            reason=encrypted_reason,
             status=request.status,
             created_at=datetime.utcnow()
         )
