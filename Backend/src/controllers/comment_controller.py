@@ -17,7 +17,7 @@ class VoteRequest(BaseModel):
     post_id: str
     category_id: str
     user_id: str
-    vote_type: str  # "up" or "down"
+    vote_type: str 
 
 async def add_comment(request: CommentRequest, db: Session):
     try:
