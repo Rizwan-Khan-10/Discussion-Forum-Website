@@ -2,94 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Discussion Forum</title>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            padding: 10px;
+            margin: 10px 5px 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 20px);
+        }
+
+        input[type="submit"], button {
+            background-color: #2980b9;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #1c5980;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .features ul li {
+            margin: 10px 0;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body>
 
-    <!-- Navbar -->
-    <nav class="bg-gray-950 p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-white">Forum</a>
-            <ul class="flex space-x-6">
-                <li><a href="#about" class="text-gray-400 hover:text-white transition">About</a></li>
-                <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
-                <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
-                <li><a href="#" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Login</a></li>
-            </ul>
-        </div>
-    </nav>
+<header>
+    <h1>Welcome to the Discussion Forum</h1>
+    <p>Engage, Learn & Share Knowledge with Experts.</p>
+</header>
 
-    <!-- Hero Section (Full Screen) -->
-    <section class="h-screen flex flex-col items-center justify-center text-center bg-gray-950">
-        <h1 class="text-6xl font-bold">Welcome to the Discussion Forum</h1>
-        <p class="text-gray-400 mt-4 text-lg">Engage, Learn & Share Knowledge with Experts.</p>
+<nav>
+    <a href="#">About</a>
+    <a href="#">Features</a>
+    <a href="#contact">Contact</a> <!-- Contact button scrolls here -->
+    <a href="login.html">Login</a>
+</nav>
 
-        <!-- Search Bar -->
-        <div class="mt-6 flex w-full max-w-lg">
-            <input type="text" placeholder="Search topics..." class="w-full p-4 rounded-l bg-gray-800 text-gray-200 focus:outline-none">
-            <button class="bg-blue-700 px-6 rounded-r text-white hover:bg-blue-800 transition">Search</button>
-        </div>
-
-        <!-- CTA -->
-        <a href="#" class="mt-6 px-6 py-3 bg-blue-700 text-lg font-semibold rounded hover:bg-blue-800 transition">Join Now</a>
+<div class="container">
+    <section>
+        <form>
+            <input type="text" placeholder="Search topics...">
+            <button type="submit">Search</button>
+        </form>
+        <button>Join Now</button>
     </section>
 
-    <!-- About Website -->
-    <section id="about" class="container mx-auto py-20">
-        <h2 class="text-5xl font-bold text-center">About Discussion Forum</h2>
-        <p class="text-gray-400 text-lg mt-6 text-center max-w-3xl mx-auto">
-            Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you will find engaging discussions on technology, gaming, science, and much more.
+    <section>
+        <h2>About Discussion Forum</h2>
+        <p>
+            Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you’ll find engaging discussions on technology, gaming, science, and much more.
         </p>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="container mx-auto py-20 bg-gray-800 rounded-lg">
-        <h2 class="text-5xl font-bold text-center">Features</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">Real-time Discussions</h3>
-                <p class="text-gray-400 mt-2">Engage in live conversations with experts & peers.</p>
-            </div>
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">Secure & Private</h3>
-                <p class="text-gray-400 mt-2">We prioritize security and keep discussions safe.</p>
-            </div>
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">User-friendly Interface</h3>
-                <p class="text-gray-400 mt-2">A smooth & easy-to-use experience for all users.</p>
-            </div>
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">Notifications & Updates</h3>
-                <p class="text-gray-400 mt-2">Stay updated with the latest discussions.</p>
-            </div>
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">Topic Categorization</h3>
-                <p class="text-gray-400 mt-2">Find relevant discussions quickly with categories.</p>
-            </div>
-            <div class="bg-gray-900 p-8 rounded-lg shadow-md">
-                <h3 class="text-2xl font-semibold">Mobile Friendly</h3>
-                <p class="text-gray-400 mt-2">Optimized for all devices and screen sizes.</p>
-            </div>
-        </div>
+    <section class="features">
+        <h2>Features</h2>
+        <ul>
+            <li><strong>Real-time Discussions:</strong> Engage in live conversations with experts & peers.</li>
+            <li><strong>Secure & Private:</strong> We prioritize security and keep discussions safe.</li>
+            <li><strong>User-friendly Interface:</strong> A smooth & easy-to-use experience for all users.</li>
+            <li><strong>Notifications & Updates:</strong> Stay updated with the latest discussions.</li>
+            <li><strong>Topic Categorization:</strong> Find relevant discussions quickly with categories.</li>
+            <li><strong>Mobile Friendly:</strong> Optimized for all devices and screen sizes.</li>
+        </ul>
     </section>
 
-    <!-- Contact Us -->
-    <section id="contact" class="container mx-auto py-20">
-        <h2 class="text-5xl font-bold text-center">Contact Us</h2>
-        <form class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg mt-10">
-            <input type="text" placeholder="Your Name" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none">
-            <input type="email" placeholder="Your Email" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none">
-            <textarea placeholder="Your Message" class="w-full p-4 mb-4 bg-gray-700 text-gray-200 rounded focus:outline-none"></textarea>
-            <button class="w-full bg-blue-600 p-4 rounded-lg text-white hover:bg-blue-700 transition">Send Message</button>
+    <section id="contact"> <!-- This is the target for scrolling -->
+        <h2>Contact Us</h2>
+        <form>
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Your Email" required>
+            <textarea rows="4" placeholder="Your Message" required></textarea>
+            <input type="submit" value="Send Message">
         </form>
     </section>
+</div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-950 p-6 text-center text-gray-400">
-        <p>&copy; 2025 Discussion Forum. All rights reserved.</p>
-    </footer>
+<footer>
+    &copy; 2025 Discussion Forum. All rights reserved.
+</footer>
 
 </body>
 </html>
