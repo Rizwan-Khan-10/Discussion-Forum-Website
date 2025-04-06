@@ -36,7 +36,7 @@ async def register_user(request, db: Session):
         new_user.user_id = encrypted_user_id["user_id"]
         db.commit()
 
-        return APIResponse.success(data={"user_id": encrypted_user_id["user_id"]}, message="User registered successfully")
+        return APIResponse.success(message="User registered successfully")
 
     except APIError as e:
         raise e  
