@@ -46,13 +46,13 @@ async def register_user(request, db: Session):
 async def generate_tokens(user_id):
     refresh_token_payload = {
         "sub": user_id,
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)  # ✅ Proper UTC time
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7) 
     }
     refresh_token = jwt.encode(refresh_token_payload, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
 
     access_token_payload = {
         "sub": user_id,
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)  # ✅ Proper UTC time
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24) 
     }
     access_token = jwt.encode(access_token_payload, SECRET_KEY, algorithm=ALGORITHM)
     
