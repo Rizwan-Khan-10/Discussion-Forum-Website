@@ -1,155 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Discussion Forum</title>
     <style>
         html {
             scroll-behavior: smooth;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        nav {
-            background-color: #34495e;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-
-        h2 {
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 5px;
-            color: #333;
-        }
-
-        input[type="text"], input[type="email"], textarea {
-            padding: 10px;
-            margin: 10px 5px 20px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: calc(100% - 20px);
-        }
-
-        input[type="submit"], button {
-            background-color: #2980b9;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        input[type="submit"]:hover, button:hover {
-            background-color: #1c5980;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .features ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .features ul li {
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
 
-<header>
+    <nav>
+        <a href="#">Forum</a> |
+        <a href="#about">About</a> |
+        <a href="#features">Features</a> |
+        <a href="#contact">Contact</a> |
+        <a href="login.html">Login</a>
+    </nav>
+
     <h1>Welcome to the Discussion Forum</h1>
     <p>Engage, Learn & Share Knowledge with Experts.</p>
-</header>
 
-<nav>
-    <a href="#">About</a>
-    <a href="#">Features</a>
-    <a href="#contact">Contact</a> <!-- Contact button scrolls here -->
-    <a href="login.html">Login</a>
-</nav>
+    <input type="text" placeholder="Search topics...">
+    <button>Search</button>
+    <br>
+    <button>Join Now</button>
 
-<div class="container">
-    <section>
-        <form>
-            <input type="text" placeholder="Search topics...">
-            <button type="submit">Search</button>
-        </form>
-        <button>Join Now</button>
-    </section>
+    <h2 id="about">About Discussion Forum</h2>
+    <p>Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you will find engaging discussions on technology, gaming, science, and much more.</p>
 
-    <section>
-        <h2>About Discussion Forum</h2>
-        <p>
-            Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you’ll find engaging discussions on technology, gaming, science, and much more.
-        </p>
-    </section>
+    <h2 id="features">Features</h2>
 
-    <section class="features">
-        <h2>Features</h2>
-        <ul>
-            <li><strong>Real-time Discussions:</strong> Engage in live conversations with experts & peers.</li>
-            <li><strong>Secure & Private:</strong> We prioritize security and keep discussions safe.</li>
-            <li><strong>User-friendly Interface:</strong> A smooth & easy-to-use experience for all users.</li>
-            <li><strong>Notifications & Updates:</strong> Stay updated with the latest discussions.</li>
-            <li><strong>Topic Categorization:</strong> Find relevant discussions quickly with categories.</li>
-            <li><strong>Mobile Friendly:</strong> Optimized for all devices and screen sizes.</li>
-        </ul>
-    </section>
+    <h3>Real-time Discussions</h3>
+    <p>Engage in live conversations with experts & peers.</p>
 
-    <section id="contact"> <!-- This is the target for scrolling -->
-        <h2>Contact Us</h2>
-        <form>
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea rows="4" placeholder="Your Message" required></textarea>
-            <input type="submit" value="Send Message">
-        </form>
-    </section>
-</div>
+    <h3>Secure & Private</h3>
+    <p>We prioritize security and keep discussions safe.</p>
 
-<footer>
-    &copy; 2025 Discussion Forum. All rights reserved.
-</footer>
+    <h3>User-friendly Interface</h3>
+    <p>A smooth & easy-to-use experience for all users.</p>
+
+    <h3>Notifications & Updates</h3>
+    <p>Stay updated with the latest discussions.</p>
+
+    <h3>Topic Categorization</h3>
+    <p>Find relevant discussions quickly with categories.</p>
+
+    <h3>Mobile Friendly</h3>
+    <p>Optimized for all devices and screen sizes.</p>
+
+    <h2 id="contact">Contact Us</h2>
+    <form>
+        <input type="text" placeholder="Your Name">
+        <input type="email" placeholder="Your Email">
+        <input type="text" placeholder="Your Message">
+        <button type="submit">Send Message</button>
+    </form>
+
+    <p>&copy; 2025 Discussion Forum. All rights reserved.</p>
 
 </body>
 </html>
