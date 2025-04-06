@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Discussion Forum</title>
+    <title>User Profile - Discussion Forum</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -13,8 +13,15 @@
         <div class="max-w-screen-xl mx-auto flex justify-between items-center">
             <a href="index.html" class="text-xl font-semibold">Discussion Forum</a>
             <div>
-                <!-- Correct link to notifications.html -->
-                <a href="notifications.html" class="text-white hover:text-gray-200 mr-4">Notifications</a>
+                <!-- Explore Button -->
+                <a href="explore.html" class="text-white hover:text-gray-200 mr-4">Explore</a>
+                <!-- Community Button -->
+                <a href="community.html" class="text-white hover:text-gray-200 mr-4">Community</a>
+                <!-- Bookmarks Button -->
+                <a href="bookmark.html" class="text-white hover:text-gray-200 mr-4">Bookmarks</a>
+                <!-- Notifications Button -->
+                <a href="notification.html" class="text-white hover:text-gray-200 mr-4">Notifications</a>
+                <!-- Logout Button -->
                 <a href="login.html" class="text-white hover:text-gray-200">Logout</a>
             </div>
         </div>
@@ -22,50 +29,92 @@
 
     <!-- Profile Section -->
     <div class="max-w-screen-lg mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">My Profile</h2>
+        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">User Profile</h2>
 
-        <form action="" method="POST" class="space-y-6">
+        <!-- User Information -->
+        <div class="flex justify-center items-center mb-8">
+            <img src="https://via.placeholder.com/100" alt="Profile Picture" class="rounded-full border-4 border-gray-600 mr-4">
+            <div>
+                <h3 class="text-xl font-semibold text-gray-800">John Doe</h3>
+                <p class="text-gray-600">Member since: January 2025</p>
+                <p class="text-gray-600">Email: johndoe@example.com</p>
+            </div>
+        </div>
 
-            <!-- Profile Picture Section -->
-            <div class="flex items-center space-x-4">
-                <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                    <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200" alt="Profile Picture" class="w-full h-full object-cover">
+        <!-- Follow Stats -->
+        <div class="flex justify-center gap-10 mb-8">
+            <div class="text-center">
+                <p class="text-lg font-semibold text-gray-800">Followers</p>
+                <p class="text-xl font-bold text-gray-700">150</p>
+            </div>
+            <div class="text-center">
+                <p class="text-lg font-semibold text-gray-800">Following</p>
+                <p class="text-xl font-bold text-gray-700">75</p>
+            </div>
+        </div>
+
+        <!-- Follow Button -->
+        <div class="flex justify-center mb-6">
+            <button id="follow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Follow
+            </button>
+        </div>
+
+        <!-- Profile Actions -->
+        <div class="flex justify-center gap-6 mb-6">
+            <!-- Edit Profile Button -->
+            <a href="editprofile.html" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Profile</a>
+        </div>
+
+        <!-- User's Posts Section -->
+        <div class="mt-8">
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Posts</h3>
+            <div id="user-posts" class="space-y-6">
+                <!-- Sample Post 1 -->
+                <div class="p-4 border-b border-gray-300">
+                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
+                        <a href="comments.html">How to Build a Responsive Website?</a>
+                    </h4>
+                    <p class="text-sm text-gray-500">Posted on March 20, 2025</p>
                 </div>
-                <div>
-                    <label for="profile-picture" class="text-sm font-semibold text-gray-600">Change Profile Picture</label>
-                    <input type="file" id="profile-picture" name="profile-picture" class="mt-2 text-blue-500 cursor-pointer">
+
+                <!-- Sample Post 2 -->
+                <div class="p-4 border-b border-gray-300">
+                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
+                        <a href="comments.html">Best Practices for Web Accessibility</a>
+                    </h4>
+                    <p class="text-sm text-gray-500">Posted on March 22, 2025</p>
                 </div>
-            </div>
 
-            <!-- Username Section -->
-            <div>
-                <label for="username" class="block text-sm font-semibold text-gray-600">Username</label>
-                <input type="text" id="username" name="username" value="" class="mt-2 p-2 w-full border border-gray-300 rounded-md">
-            </div>
+                <!-- Sample Post 3 -->
+                <div class="p-4 border-b border-gray-300">
+                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
+                        <a href="comments.html">The Importance of Website Security</a>
+                    </h4>
+                    <p class="text-sm text-gray-500">Posted on April 1, 2025</p>
+                </div>
 
-            <!-- Email Section -->
-            <div>
-                <label for="email" class="block text-sm font-semibold text-gray-600">Email Address</label>
-                <input type="email" id="email" name="email" value="" class="mt-2 p-2 w-full border border-gray-300 rounded-md">
+                <!-- You can add more posts here -->
             </div>
-
-            <!-- Bio Section -->
-            <div>
-                <label for="bio" class="block text-sm font-semibold text-gray-600">Bio</label>
-                <textarea id="bio" name="bio" rows="4" class="mt-2 p-2 w-full border border-gray-300 rounded-md"></textarea>
-            </div>
-
-            <!-- Save Changes Button -->
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
-            </div>
-        </form>
-
-        <!-- Link to Notifications -->
-        <div class="mt-6 text-center">
-            <a href="notifications.html" class="text-blue-500 hover:text-blue-700 text-sm">Go to Notifications</a>
         </div>
     </div>
+
+    <!-- Script for Toggle Follow Button -->
+    <script>
+        const followButton = document.getElementById('follow-btn');
+
+        followButton.addEventListener('click', () => {
+            if (followButton.innerText === 'Follow') {
+                followButton.innerText = 'Unfollow';
+                followButton.classList.remove('bg-blue-600');
+                followButton.classList.add('bg-red-600');
+            } else {
+                followButton.innerText = 'Follow';
+                followButton.classList.remove('bg-red-600');
+                followButton.classList.add('bg-blue-600');
+            }
+        });
+    </script>
 
 </body>
 </html>
