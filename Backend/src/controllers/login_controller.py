@@ -50,6 +50,9 @@ async def register_user(request, db: Session):
             "total_upvotes": "0",
             "total_downvotes": "0",
             "reputation": "10",
+            "total_bookmarks": "0",
+            "total_shares": "0",
+            "total_views": "0",
             "blockUser": "",
             "blockCommunity": "",
             "blockPost": ""
@@ -65,6 +68,9 @@ async def register_user(request, db: Session):
             total_upvotes=encrypted_profile_data["total_upvotes"],
             total_downvotes=encrypted_profile_data["total_downvotes"],
             reputation=encrypted_profile_data["reputation"],
+            total_bookmarks=encrypted_profile_data["total_bookmarks"],
+            total_shares=encrypted_profile_data["total_shares"],
+            total_views=encrypted_profile_data["total_views"],
             blockUser=encrypted_profile_data["blockUser"],
             blockCommunity=encrypted_profile_data["blockCommunity"],
             blockPost=encrypted_profile_data["blockPost"]

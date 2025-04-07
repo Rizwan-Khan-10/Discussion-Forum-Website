@@ -44,7 +44,10 @@ async def get_user_profile(user_id: str, db: Session):
             "total_posts": matched_profile.total_posts,
             "total_upvotes": matched_profile.total_upvotes,
             "total_downvotes": matched_profile.total_downvotes,
-            "reputation": matched_profile.reputation
+            "reputation": matched_profile.reputation,
+            "total_bookmarks": matched_profile.total_bookmarks,
+            "total_shares": matched_profile.total_shares,
+            "total_views": matched_profile.total_views,
         })
 
         response_data = {
@@ -59,7 +62,10 @@ async def get_user_profile(user_id: str, db: Session):
             "total_posts": decrypted_data.get("total_posts"),
             "total_upvotes": decrypted_data.get("total_upvotes"),
             "total_downvotes": decrypted_data.get("total_downvotes"),
-            "reputation": decrypted_data.get("reputation")
+            "reputation": decrypted_data.get("reputation"),
+            "total_bookmarks": decrypted_data.get("total_bookmarks"),
+            "total_shares": decrypted_data.get("total_shares"),
+            "total_views": decrypted_data.get("total_views"),
         }
 
         return APIResponse.success(data=response_data, message="User profile retrieved successfully.")

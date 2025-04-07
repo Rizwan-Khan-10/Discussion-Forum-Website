@@ -17,6 +17,14 @@ let imageChanged = false;
 let imageRemoved = false;
 const defaultBio = "Listening, learning, and maybe posting soon...";
 const myDiv = document.getElementById("profile");
+const usernameInput = document.getElementById("username");
+
+usernameInput.addEventListener("input", function () {
+    this.value = this.value.replace(/\s/g, "");
+    if (this.value.length > 16) {
+        this.value = this.value.slice(0, 16);
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     getProfile();
@@ -178,3 +186,31 @@ async function getProfile() {
         console.error("Error fetching profile:", error);
     }
 }
+
+document.getElementById("addPost").addEventListener("click", () => {
+    const modal = document.getElementById("postModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+});
+
+document.getElementById("close-post").addEventListener("click", () => {
+    const modal = document.getElementById("postModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+});
+
+document.getElementById("postImage").addEventListener("change", function () {
+    const preview = document.getElementById("imagePreview");
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.classList.add("hidden");
+        preview.src = "";
+    }
+});

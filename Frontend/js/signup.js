@@ -1,4 +1,17 @@
 const form = document.querySelector("form");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
+usernameInput.addEventListener("input", function () {
+    this.value = this.value.replace(/\s/g, "");
+    if (this.value.length > 16) {
+        this.value = this.value.slice(0, 16);
+    }
+});
+
+passwordInput.addEventListener("input", function () {
+    this.value = this.value.replace(/\s/g, "");
+});
 
 form.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -12,14 +25,12 @@ form.addEventListener("submit", async function (e) {
         alert("Passwords do not match!");
         return;
     }
-    if (/\s/.test(password)) {
-        alert("Password should not contain spaces!");
-        return;
-    }
+
     if (password.length < 8) {
         alert("Password must be at least 8 characters long!");
         return;
-    }
+    }    
+
     try {
         await submitSignupData({ username, email, password });
     } catch (error) {

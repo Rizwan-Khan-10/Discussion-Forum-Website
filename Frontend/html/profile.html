@@ -11,7 +11,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
-<body class="bg-gray-900 text-white font-sans">
+<body class="bg-gray-900 text-white relative">
     <nav class="bg-gray-800 p-4 shadow-md">
         <div class="max-w-screen-xl mx-auto flex justify-between items-center">
             <a href="index.html" class="text-sm md:text-base font-extrabold text-white hover:text-blue-400 transition">
@@ -58,30 +58,19 @@
         <div class="flex flex-col w-full md:max-w-[40%] gap-5">
             <div class="flex justify-center gap-4 w-full text-center">
                 <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Followers</p>
+                    <i class="fa-solid fa-users text-blue-400 text-lg mb-1"></i>
+                    <p class="text-xs text-gray-300">Followers</p>
                     <p id="followers-count" class="text-base md:text-xl font-bold text-white">0</p>
                 </div>
                 <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Following</p>
+                    <i class="fa-solid fa-user-plus text-green-400 text-lg mb-1"></i>
+                    <p class="text-xs text-gray-300">Following</p>
                     <p id="following-count" class="text-base md:text-xl font-bold text-white">0</p>
                 </div>
                 <div class="w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Reputation</p>
+                    <i class="fa-solid fa-star text-yellow-400 text-lg mb-1"></i>
+                    <p class="text-xs text-gray-300">Reputation</p>
                     <p id="reputation-count" class="text-base md:text-xl font-bold text-white">0</p>
-                </div>
-            </div>
-            <div class="flex justify-center gap-4 w-full text-center">
-                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Posts</p>
-                    <p id="posts-count" class="text-base md:text-xl font-bold text-white">0</p>
-                </div>
-                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Up Votes</p>
-                    <p id="upvotes-count" class="text-base md:text-xl font-bold text-white">0</p>
-                </div>
-                <div class="w-[100px]">
-                    <p class="text-xs md:text-sm text-gray-300">Down Votes</p>
-                    <p id="downvotes-count" class="text-base md:text-xl font-bold text-white">0</p>
                 </div>
             </div>
             <div id="followDiv" class="hidden flex-row gap-4 w-full justify-center">
@@ -94,7 +83,6 @@
                     Message
                 </button>
             </div>
-
             <div id="editDiv" class="flex flex-row gap-4 w-full justify-center">
                 <button id="editProfile"
                     class="w-40 px-6 py-2 text-[11px] sm:text-sm bg-blue-600 text-white rounded-lg border hover:bg-blue-700 transition font-semibold shadow">
@@ -107,38 +95,111 @@
             </div>
         </div>
     </div>
+    <div class="w-full flex justify-center px-6 py-3">
+        <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#4b3c91] to-[#362667] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-file-alt text-violet-300 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Posts</p>
+                <p id="posts-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#1f7c51] to-[#13543b] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-up-long text-emerald-300 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Upvotes</p>
+                <p id="upvotes-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#8b2e3b] to-[#541c25] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-down-long text-rose-300 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Downvotes</p>
+                <p id="downvotes-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#22577a] to-[#113f5c] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-eye text-sky-300 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Views</p>
+                <p id="view-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#3a733b] to-[#265226] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-share-alt text-lime-300 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Shares</p>
+                <p id="share-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+            <div
+                class="flex flex-col items-center p-2 w-[80px] sm:w-[100px] rounded-lg bg-gradient-to-br from-[#b68d2b] to-[#6b5319] hover:scale-[1.02] transition-all duration-200">
+                <i class="fa-solid fa-bookmark text-yellow-200 text-lg mb-1"></i>
+                <p class="text-[10px] text-gray-300">Bookmarks</p>
+                <p id="bookmark-count" class="text-white font-semibold text-sm">0</p>
+            </div>
+        </div>
+    </div>
     <div class="flex justify-around w-full">
         <span id="showPost" class="text-sm md:text-lg px-6 py-3 border-b">Posts</span>
         <span id="showFollowed" class="text-sm md:text-lg px-6 py-3">Followed</span>
         <span id="showBookmark" class="text-sm md:text-lg px-6 py-3">Bookmarks</span>
     </div>
     <div id="display" class="my-6 px-6 flex flex-wrap gap-8 justify-around">
-        <div class="w-72 h-80 bg-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col border-2">
+        <div class="w-72 h-[400px] bg-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col border-2">
             <div class="w-full h-48 overflow-hidden">
                 <img src="../assets/profile.png" alt="Post Image" class="w-full h-full object-cover" />
             </div>
             <div class="flex flex-col justify-between p-4 flex-grow">
                 <div>
                     <h4
-                        class="text-lg font-semibold text-blue-400 hover:text-blue-500 transition leading-snug truncate">
+                        class="text-base font-semibold text-blue-400 hover:text-blue-500 transition leading-snug truncate">
                         Best Practices for Clean Code in Large Scale Projects and How to Maintain It</h4>
+                    <p class="text-xs text-gray-400 mt-1 flex">
+                        <span class="mr-1 text-gray-400 shrink-0">Category:</span>
+                        <span
+                            class="text-white font-medium whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[160px]">
+                            Web Development
+                        </span>
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1 flex">
+                        <span class="mr-1 text-gray-400 shrink-0">Tags:</span>
+                        <span
+                            class="text-white font-medium whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[160px]">
+                            Clean Code, Best Practices, Software Development
+                        </span>
+                    </p>
                     <p class="text-xs text-gray-400 mt-1">Posted by <span class="text-white font-medium">codeGuru</span>
                         on April 7, 2025</p>
                 </div>
+
+                <!-- Action Buttons - Colorful Icons -->
+                <div class="mt-4 flex justify-between text-gray-300 border-t border-gray-600 pt-3">
+                    <button class="flex items-center gap-1 text-sm hover:text-yellow-300">
+                        <i class="fa-regular fa-bookmark text-yellow-300 text-xs"></i>
+                        <span>58</span>
+                    </button>
+                    <button class="flex items-center gap-1 text-sm">
+                        <i class="fa-solid fa-share-alt text-lime-300 text-xs"></i>
+                        <span>58</span>
+                    </button>
+                    <button class="flex items-center gap-1 text-sm">
+                        <i class="fa-regular fa-square-plus text-purple-500 text-xs"></i>
+                        <span>58</span>
+                    </button>
+                    <button class="flex items-center gap-1 text-sm">
+                        <i class="fa-regular fa-flag text-red-300 text-xs"></i>
+                    </button>
+                </div>
                 <div class="flex justify-between text-sm text-gray-300 mt-4 border-t border-gray-600 pt-3">
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 text-xs">
                         <i class="fa-solid fa-up-long text-green-400"></i>
                         <span>58</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 text-xs">
                         <i class="fa-solid fa-down-long text-red-400"></i>
                         <span>12</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 text-xs">
                         <i class="fa-regular fa-eye text-emerald-400"></i>
                         <span>410</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 text-xs">
                         <i class="fa-regular fa-comment text-blue-400"></i>
                         <span>4</span>
                     </div>
@@ -185,6 +246,75 @@
                 </div>
             </form>
         </div>
+    </div>
+    <div id="postModal" class="fixed inset-0 bg-black bg-opacity-60 hidden justify-center items-center z-50">
+        <div class="w-full max-w-xl bg-gray-900 p-6 rounded-xl shadow-lg relative mx-4 sm:mx-0 mt-16 mb-16">
+            <i id="close-post"
+                class="absolute top-3 right-4 text-gray-400 hover:text-white text-base sm:text-lg fa-solid fa-times cursor-pointer"></i>
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-5 text-center">Create New Post</h2>
+            <form class="space-y-4" id="postForm">
+                <div>
+                    <label for="postTitle" class="block text-sm text-gray-300 mb-1">Title</label>
+                    <input type="text" id="postTitle" name="postTitle"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 text-sm focus:ring-blue-500"
+                        placeholder="Enter your post title">
+                </div>
+                <div>
+                    <label for="postContent" class="block text-sm text-gray-300 mb-1">Description</label>
+                    <textarea id="postContent" name="postContent"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white text-sm resize-none h-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Write your post..."></textarea>
+                </div>
+                <div>
+                    <label for="postImage" class="block text-sm text-gray-300 mb-1">Upload Image</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 text-sm focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="tags" class="block text-sm text-gray-300 mb-1">Tags (comma separated)</label>
+                    <input type="text" id="tags" name="tags"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 text-sm focus:ring-blue-500"
+                        placeholder="e.g. html, javascript, webdev">
+                </div>
+                <div>
+                    <label for="category" class="block text-sm text-gray-300 mb-1">Category</label>
+                    <select id="category" name="category"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="general">General Discussion</option>
+                        <option value="announcements">Announcements</option>
+                        <option value="questions">Questions & Answers</option>
+                        <option value="feedback">Feedback & Suggestions</option>
+                        <option value="support">Technical Support</option>
+                        <option value="guides">Guides & Tutorials</option>
+                        <option value="projects">Projects & Showcases</option>
+                        <option value="career">Career / Jobs / Internships</option>
+                        <option value="events">Events / Meetups</option>
+                        <option value="news">News & Updates</option>
+                        <option value="webdev">Web Development</option>
+                        <option value="appdev">App Development</option>
+                        <option value="gamedev">Game Development</option>
+                        <option value="ai_ml">AI & Machine Learning</option>
+                        <option value="cybersecurity">Cybersecurity</option>
+                        <option value="opensource">Open Source</option>
+                        <option value="programming">Programming Help</option>
+                        <option value="college">College / Academics</option>
+                        <option value="lifestyle">Lifestyle & Wellness</option>
+                        <option value="fun">Memes / Fun</option>
+                        <option value="offtopic">Off Topic</option>
+                    </select>
+                </div>
+                <div class="flex w-full justify-center">
+                    <button type="submit"
+                        class="w-40 bg-blue-600 hover:bg-blue-700 text-base transition border text-white font-semibold py-2 rounded-lg">
+                        Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="addPost"
+        class="fixed bottom-6 right-6 flex items-center justify-center border bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg cursor-pointer transition w-8 h-8 sm:w-12 sm:h-12">
+        <i class="fa-solid fa-plus text-sm md:text-base"></i>
     </div>
     <script src="../js/profile.js"></script>
     <script src="../js/utils.js"></script>
