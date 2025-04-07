@@ -1,49 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-sm bg-gray-800 rounded-xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-xl sm:text-2xl font-semibold text-center mb-5">Create an Account</h2>
-        <form action="#" method="POST" class="space-y-4" autocomplete="on">
-            <div>
-                <label for="username" class="block text-xs sm:text-sm font-medium text-gray-300">Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username"
-                    class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    placeholder="Choose a username">
+
+<body class="bg-gray-900 text-white">
+    <nav class="bg-gray-800 p-4 shadow-md">
+        <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-sm md:text-base font-extrabold text-white hover:text-blue-400 transition">
+                Discussion Forum
+            </a>
+            <div class="md:hidden focus:outline-none">
+                <i id="menu-toggle" class="fa-solid fa-bars text-base"></i>
             </div>
-            <div>
-                <label for="email" class="block text-xs sm:text-sm font-medium text-gray-300">Email Address</label>
-                <input type="email" id="email" name="email" required autocomplete="email"
-                    class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    placeholder="Enter your email">
+            <div class="hidden md:flex flex-wrap gap-6 text-sm md:text-base text-white">
+                <a href="index.html#forum" class="block hover:text-teal-300">Forum</a>
+                <a href="index.html#about" class="block hover:text-teal-300">About</a>
+                <a href="index.html#features" class="block hover:text-teal-300">Features</a>
+                <a href="index.html#contact" class="block hover:text-teal-300">Contact</a>
+                <a href="login.html" class="block text-teal-400 font-medium hover:underline">Login</a>
             </div>
-            <div>
-                <label for="password" class="block text-xs sm:text-sm font-medium text-gray-300">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="new-password"
-                    class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    placeholder="Create a password">
+        </div>
+        <div id="mobile-menu"
+            class="fixed top-0 right-0 h-full w-64 bg-gray-900 text-white p-6 transform translate-x-full transition-transform duration-300 z-50 md:hidden">
+            <i id="close-menu" class="absolute top-4 right-4 fa-solid fa-times text-base font-bold"></i>
+            <nav class="mt-12 space-y-6 text-base">
+                <a href="index.html#forum" class="block hover:text-teal-300">Forum</a>
+                <a href="index.html#about" class="block hover:text-teal-300">About</a>
+                <a href="index.html#features" class="block hover:text-teal-300">Features</a>
+                <a href="index.html#contact" class="block hover:text-teal-300">Contact</a>
+                <a href="login.html" class="block text-teal-400 font-medium hover:underline">Login</a>
+            </nav>
+        </div>
+    </nav>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-sm bg-gray-800 rounded-xl shadow-xl p-6 sm:p-8">
+            <h2 class="text-xl sm:text-2xl font-semibold text-center mb-5">Create an Account</h2>
+            <form action="#" method="POST" class="space-y-4" autocomplete="on">
+                <div>
+                    <label for="username" class="block text-xs sm:text-sm font-medium text-gray-300">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username"
+                        class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                        placeholder="Choose a username">
+                </div>
+                <div>
+                    <label for="email" class="block text-xs sm:text-sm font-medium text-gray-300">Email Address</label>
+                    <input type="email" id="email" name="email" required autocomplete="email"
+                        class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                        placeholder="Enter your email">
+                </div>
+                <div>
+                    <label for="password" class="block text-xs sm:text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="new-password"
+                        class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                        placeholder="Create a password">
+                </div>
+                <div>
+                    <label for="confirm_password" class="block text-xs sm:text-sm font-medium text-gray-300">Confirm
+                        Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required
+                        autocomplete="new-password"
+                        class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                        placeholder="Confirm your password">
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-sm p-2.5 text-white rounded-lg hover:bg-blue-700 transition duration-200 mt-2">Sign
+                    Up</button>
+            </form>
+            <div class="mt-4 text-center">
+                <p class="text-xs sm:text-sm text-gray-400">Already have an account?
+                    <a href="login.html" class="text-blue-400 hover:text-blue-300">Login</a>
+                </p>
             </div>
-            <div>
-                <label for="confirm_password" class="block text-xs sm:text-sm font-medium text-gray-300">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password"
-                    class="w-full p-2.5 mt-1 text-sm border border-gray-700 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                    placeholder="Confirm your password">
-            </div>
-            <button type="submit"
-                class="w-full bg-blue-600 text-sm p-2.5 text-white rounded-lg hover:bg-blue-700 transition duration-200 mt-2">Sign
-                Up</button>
-        </form>
-        <div class="mt-4 text-center">
-            <p class="text-xs sm:text-sm text-gray-400">Already have an account?
-                <a href="login.html" class="text-blue-400 hover:text-blue-300">Login</a>
-            </p>
         </div>
     </div>
+    <script src="../js/utils.js"></script>
     <script src="../js/signup.js"></script>
 </body>
+
 </html>

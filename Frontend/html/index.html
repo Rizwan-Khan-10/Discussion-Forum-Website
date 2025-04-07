@@ -1,64 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Discussion Forum</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         html {
             scroll-behavior: smooth;
         }
     </style>
-    <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
 
-    <nav>
-        <a href="#">Forum</a> |
-        <a href="#about">About</a> |
-        <a href="#features">Features</a> |
-        <a href="#contact">Contact</a> |
-        <a href="./login.html">Login</a>
+<body class="bg-gray-900 text-white font-sans">
+    <nav class="bg-gray-800 p-4 shadow-md fixed w-full z-50 top-0 left-0">
+        <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-sm md:text-base font-extrabold text-white hover:text-blue-400 transition">
+                Discussion Forum
+            </a>
+            <div class="md:hidden focus:outline-none">
+                <i id="menu-toggle" class="fa-solid fa-bars text-base"></i>
+            </div>
+            <div class="hidden md:flex flex-wrap gap-6 text-sm md:text-base text-white">
+                <a href="#" class="block hover:text-teal-300">Forum</a>
+                <a href="#about" class="block hover:text-teal-300">About</a>
+                <a href="#features" class="block hover:text-teal-300">Features</a>
+                <a href="#contact" class="block hover:text-teal-300">Contact</a>
+                <a href="./login.html" class="block text-teal-400 font-medium hover:underline">Login</a>
+            </div>
+        </div>
+        <div id="mobile-menu"
+            class="fixed top-0 right-0 h-full w-64 bg-gray-900 text-white p-6 transform translate-x-full transition-transform duration-300 z-50 md:hidden">
+            <i id="close-menu" class="absolute top-4 right-4 fa-solid fa-times text-base font-bold"></i>
+            <nav class="mt-12 space-y-6 text-base">
+                <a href="#" class="block hover:text-teal-300">Forum</a>
+                <a href="#about" class="block hover:text-teal-300">About</a>
+                <a href="#features" class="block hover:text-teal-300">Features</a>
+                <a href="#contact" class="block hover:text-teal-300">Contact</a>
+                <a href="./login.html" class="block text-teal-400 font-medium hover:underline">Login</a>
+            </nav>
+        </div>
     </nav>
-
-    <h1>Welcome to the Discussion Forum</h1>
-    <p>Engage, Learn & Share Knowledge with Experts.</p>
-
-    <input type="text" placeholder="Search topics...">
-    <button>Search</button>
-    <br>
-    <button>Join Now</button>
-
-    <h2 id="about">About Discussion Forum</h2>
-    <p>Our discussion forum is a space where individuals can share their thoughts, learn new things, and interact with like-minded people. Whether you're a beginner or an expert, you will find engaging discussions on technology, gaming, science, and much more.</p>
-
-    <h2 id="features">Features</h2>
-
-    <h3>Real-time Discussions</h3>
-    <p>Engage in live conversations with experts & peers.</p>
-
-    <h3>Secure & Private</h3>
-    <p>We prioritize security and keep discussions safe.</p>
-
-    <h3>User-friendly Interface</h3>
-    <p>A smooth & easy-to-use experience for all users.</p>
-
-    <h3>Notifications & Updates</h3>
-    <p>Stay updated with the latest discussions.</p>
-
-    <h3>Topic Categorization</h3>
-    <p>Find relevant discussions quickly with categories.</p>
-
-    <h3>Mobile Friendly</h3>
-    <p>Optimized for all devices and screen sizes.</p>
-
-    <h2 id="contact">Contact Us</h2>
-    <form>
-        <input type="text" placeholder="Your Name">
-        <input type="email" placeholder="Your Email">
-        <input type="text" placeholder="Your Message">
-        <button type="submit">Send Message</button>
-    </form>
-
-    <p>&copy; 2025 Discussion Forum. All rights reserved.</p>
-
+    <section id="forum" class="text-center py-16 px-4 mt-10">
+        <h1 class="text-4xl sm:text-5xl font-bold text-teal-400 mb-4">Welcome to the Discussion Forum</h1>
+        <p class="text-gray-300 mb-6">Engage, Learn & Share Knowledge with Experts and fellow enthusiasts.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+            <input id="searchInput" type="text" placeholder="Search topics like AI, Web Dev, Python..."
+                autocomplete="off"
+                class="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700 text-white placeholder-gray-400" />
+            <button class="px-4 py-2 bg-teal-500 hover:bg-teal-600 rounded text-white font-semibold">Search</button>
+        </div>
+        <button class="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold">Join Now</button>
+    </section>
+    <section id="about" class="bg-gray-800 py-12 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-teal-400 mb-4">About Discussion Forum</h2>
+            <p class="text-gray-300">Our discussion forum provides a welcoming environment for curious minds. Whether
+                you're exploring the basics or diving deep into advanced topics, you’ll find insightful conversations on
+                technology, development, science, education, career, and more. Join a vibrant community that values
+                knowledge sharing and respectful debates.</p>
+        </div>
+    </section>
+    <section id="features" class="py-12 px-4 bg-gray-900">
+        <div class="max-w-6xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-teal-400 mb-8">Features</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">Real-time Discussions</h3>
+                    <p class="text-gray-400">Engage in live Q&A, debates, and topic-specific threads with peers and
+                        mentors.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">Secure & Private</h3>
+                    <p class="text-gray-400">Robust user authentication and moderation ensure a safe environment.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">User-friendly Interface</h3>
+                    <p class="text-gray-400">Minimalist and intuitive design for seamless browsing and posting.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">Notifications & Updates</h3>
+                    <p class="text-gray-400">Stay informed with custom alerts, replies, and trending topics.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">Topic Categorization</h3>
+                    <p class="text-gray-400">Discussions are organized by topic for quick access and better readability.
+                    </p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded shadow hover:shadow-lg transition">
+                    <h3 class="text-lg font-semibold text-white mb-2">Mobile Friendly</h3>
+                    <p class="text-gray-400">Fully responsive interface built for all devices, from phones to desktops.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="contact" class="bg-gray-800 py-12 px-4">
+        <div class="max-w-xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-teal-400 mb-6">Contact Us</h2>
+            <form class="space-y-4">
+                <input id="contactName" type="text" placeholder="Your Full Name" autocomplete="name"
+                    class="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white placeholder-gray-400" />
+                <input id="contactEmail" type="email" placeholder="Your Email Address" autocomplete="email"
+                    class="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white placeholder-gray-400" />
+                <textarea id="contactMessage" placeholder="Your Message or Query..." rows="4" autocomplete="off"
+                    class="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white placeholder-gray-400"></textarea>
+                <button type="submit"
+                    class="px-6 py-2 bg-teal-500 hover:bg-teal-600 rounded text-white font-semibold">Send
+                    Message</button>
+            </form>
+        </div>
+    </section>
+    <footer class="bg-gray-900 text-center py-6 text-gray-500 text-sm">
+        &copy; 2025 Discussion Forum. All rights reserved.
+    </footer>
+    <script src="../js/utils.js"></script>
+    <script src="../js/script.js"></script>
 </body>
+
 </html>
