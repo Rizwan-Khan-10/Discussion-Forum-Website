@@ -7,12 +7,10 @@ class User(Base):
     __tablename__ = "users"
     
     user_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(String, nullable=False)
+    username = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False)
-    access_token = Column(Text, nullable=True)
-    refresh_token = Column(Text, nullable=True)
     
     profile = relationship("UserProfile", back_populates="user")
     posts = relationship("Post", back_populates="user")

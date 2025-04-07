@@ -1,120 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile - Discussion Forum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Profile</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-100 font-sans">
 
-    <!-- Navbar -->
-    <nav class="bg-gray-600 p-4 text-white">
+<body class="bg-gray-900 text-white font-sans">
+    <nav class="bg-gray-800 p-4 shadow-md">
         <div class="max-w-screen-xl mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-xl font-semibold">Discussion Forum</a>
-            <div>
-                <!-- Explore Button -->
-                <a href="explore.html" class="text-white hover:text-gray-200 mr-4">Explore</a>
-                <!-- Community Button -->
-                <a href="community.html" class="text-white hover:text-gray-200 mr-4">Community</a>
-                <!-- Bookmarks Button -->
-                <a href="bookmark.html" class="text-white hover:text-gray-200 mr-4">Bookmarks</a>
-                <!-- Notifications Button -->
-                <a href="notification.html" class="text-white hover:text-gray-200 mr-4">Notifications</a>
-                <!-- Logout Button -->
-                <a href="login.html" class="text-white hover:text-gray-200">Logout</a>
+            <a href="index.html" class="text-sm md:text-base font-extrabold text-white hover:text-blue-400 transition">
+                Discussion Forum
+            </a>
+            <div class="md:hidden focus:outline-none">
+                <i id="menu-toggle" class="fa-solid fa-bars text-base"></i>
             </div>
+            <div class="hidden md:flex flex-wrap gap-6 text-sm md:text-base text-white">
+                <a href="home.html" class="hover:text-blue-400">Home</a>
+                <a href="explore.html" class="hover:text-blue-400">Explore</a>
+                <a href="community.html" class="hover:text-blue-400">Community</a>
+                <a href="notification.html" class="hover:text-blue-400">Notifications</a>
+                <a href="chat.html" class="hover:text-blue-400">Messages</a>
+                <a href="profile.html" class="hover:text-blue-400">Profile</a>
+                <a href="login.html" class="hover:text-blue-400">Logout</a>
+            </div>
+        </div>
+        <div id="mobile-menu"
+            class="fixed top-0 right-0 h-full w-64 bg-gray-900 text-white p-6 transform translate-x-full transition-transform duration-300 z-50 md:hidden">
+            <i id="close-menu" class="absolute top-4 right-4 fa-solid fa-times text-base font-bold"></i>
+            <nav class="mt-12 space-y-6 text-base">
+                <a href="home.html" class="block hover:text-blue-400">Home</a>
+                <a href="explore.html" class="block hover:text-blue-400">Explore</a>
+                <a href="community.html" class="block hover:text-blue-400">Community</a>
+                <a href="notification.html" class="block hover:text-blue-400">Notifications</a>
+                <a href="chat.html" class="block hover:text-blue-400">Messages</a>
+                <a href="profile.html" class="hover:text-blue-400">Profile</a>
+                <a href="login.html" class="block hover:text-blue-400">Logout</a>
+            </nav>
         </div>
     </nav>
-
-    <!-- Profile Section -->
-    <div class="max-w-screen-lg mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">User Profile</h2>
-
-        <!-- User Information -->
-        <div class="flex justify-center items-center mb-8">
-            <img src="https://via.placeholder.com/100" alt="Profile Picture" class="rounded-full border-4 border-gray-600 mr-4">
-            <div>
-                <h3 class="text-xl font-semibold text-gray-800">John Doe</h3>
-                <p class="text-gray-600">Member since: January 2025</p>
-                <p class="text-gray-600">Email: johndoe@example.com</p>
+    <div id="profile" class="flex flex-col md:flex-row justify-between items-start gap-8 mt-2 p-6">
+        <div class="flex flex-row items-center gap-6 w-full md:max-w-[60%] relative">
+            <img id="profileImg" src="../assets/profile.png" alt="Profile Picture"
+                class="rounded-full border-4 border-blue-500 w-28 h-28 shadow-md" />
+            <div class="text-left">
+                <h3 class="text-lg md:text-xl font-extrabold" id="profileUsername">Unknow</h3>
+                <p class="mt-4 text-gray-300 text-xs md:text-base" id="profileBio">
+                    Listening, learning, and maybe posting soon...
+                </p>
             </div>
         </div>
-
-        <!-- Follow Stats -->
-        <div class="flex justify-center gap-10 mb-8">
-            <div class="text-center">
-                <p class="text-lg font-semibold text-gray-800">Followers</p>
-                <p class="text-xl font-bold text-gray-700">150</p>
+        <div class="flex flex-col w-full md:max-w-[40%] gap-5">
+            <div class="flex justify-center gap-4 w-full text-center">
+                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Followers</p>
+                    <p id="followers-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
+                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Following</p>
+                    <p id="following-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
+                <div class="w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Reputation</p>
+                    <p id="reputation-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
             </div>
-            <div class="text-center">
-                <p class="text-lg font-semibold text-gray-800">Following</p>
-                <p class="text-xl font-bold text-gray-700">75</p>
+            <div class="flex justify-center gap-4 w-full text-center">
+                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Posts</p>
+                    <p id="posts-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
+                <div class="border-r pr-2 md:pr-4 border-gray-600 w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Up Votes</p>
+                    <p id="upvotes-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
+                <div class="w-[100px]">
+                    <p class="text-xs md:text-sm text-gray-300">Down Votes</p>
+                    <p id="downvotes-count" class="text-base md:text-xl font-bold text-white">0</p>
+                </div>
             </div>
-        </div>
+            <div id="followDiv" class="hidden flex-row gap-4 w-full justify-center">
+                <button id="follow-btn"
+                    class="w-32 px-6 py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-lg border hover:bg-blue-700 transition font-semibold shadow">
+                    Follow
+                </button>
+                <button id="message-btn"
+                    class="w-32 px-6 py-2 text-xs sm:text-sm bg-gray-700 border text-white rounded-lg hover:bg-gray-600 transition font-semibold shadow">
+                    Message
+                </button>
+            </div>
 
-        <!-- Follow Button -->
-        <div class="flex justify-center mb-6">
-            <button id="follow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Follow
-            </button>
-        </div>
-
-        <!-- Profile Actions -->
-        <div class="flex justify-center gap-6 mb-6">
-            <!-- Edit Profile Button -->
-            <a href="editprofile.html" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Profile</a>
-        </div>
-
-        <!-- User's Posts Section -->
-        <div class="mt-8">
-            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Posts</h3>
-            <div id="user-posts" class="space-y-6">
-                <!-- Sample Post 1 -->
-                <div class="p-4 border-b border-gray-300">
-                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
-                        <a href="comments.html">How to Build a Responsive Website?</a>
-                    </h4>
-                    <p class="text-sm text-gray-500">Posted on March 20, 2025</p>
-                </div>
-
-                <!-- Sample Post 2 -->
-                <div class="p-4 border-b border-gray-300">
-                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
-                        <a href="comments.html">Best Practices for Web Accessibility</a>
-                    </h4>
-                    <p class="text-sm text-gray-500">Posted on March 22, 2025</p>
-                </div>
-
-                <!-- Sample Post 3 -->
-                <div class="p-4 border-b border-gray-300">
-                    <h4 class="text-lg font-semibold text-blue-600 hover:text-blue-800">
-                        <a href="comments.html">The Importance of Website Security</a>
-                    </h4>
-                    <p class="text-sm text-gray-500">Posted on April 1, 2025</p>
-                </div>
-
-                <!-- You can add more posts here -->
+            <div id="editDiv" class="flex flex-row gap-4 w-full justify-center">
+                <button id="editProfile"
+                    class="w-40 px-6 py-2 text-[11px] sm:text-sm bg-blue-600 text-white rounded-lg border hover:bg-blue-700 transition font-semibold shadow">
+                    Edit Profile
+                </button>
+                <button id="manage-blocks-btn"
+                    class="w-40 px-6 py-2 text-[11px] sm:text-sm bg-gray-700 border text-white rounded-lg hover:bg-gray-600 transition font-semibold shadow">
+                    Manage Blocks
+                </button>
             </div>
         </div>
     </div>
+    <div class="flex justify-around w-full">
+        <span id="showPost" class="text-sm md:text-lg px-6 py-3 border-b">Posts</span>
+        <span id="showFollowed" class="text-sm md:text-lg px-6 py-3">Followed</span>
+        <span id="showBookmark" class="text-sm md:text-lg px-6 py-3">Bookmarks</span>
+    </div>
+    <div id="display" class="my-6 px-6 flex flex-wrap gap-8 justify-around">
+        <div class="w-72 h-80 bg-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col border-2">
+            <div class="w-full h-48 overflow-hidden">
+                <img src="../assets/profile.png" alt="Post Image" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex flex-col justify-between p-4 flex-grow">
+                <div>
+                    <h4
+                        class="text-lg font-semibold text-blue-400 hover:text-blue-500 transition leading-snug truncate">
+                        Best Practices for Clean Code in Large Scale Projects and How to Maintain It</h4>
+                    <p class="text-xs text-gray-400 mt-1">Posted by <span class="text-white font-medium">codeGuru</span>
+                        on April 7, 2025</p>
+                </div>
+                <div class="flex justify-between text-sm text-gray-300 mt-4 border-t border-gray-600 pt-3">
+                    <div class="flex items-center gap-1">
+                        <i class="fa-solid fa-up-long text-green-400"></i>
+                        <span>58</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i class="fa-solid fa-down-long text-red-400"></i>
+                        <span>12</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i class="fa-regular fa-eye text-emerald-400"></i>
+                        <span>410</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i class="fa-regular fa-comment text-blue-400"></i>
+                        <span>4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="editProfileModal" class="fixed inset-0 bg-black bg-opacity-60 hidden justify-center items-center z-50">
+        <div class="w-full max-w-md bg-gray-900 p-6 rounded-xl shadow-lg relative mx-4 sm:mx-0">
+            <i id="close-profile"
+                class="absolute top-3 right-4 text-gray-400 hover:text-white text-base sm:text-lg fa-solid fa-times"></i>
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-5 text-center">Edit Profile</h2>
+            <form class="space-y-4" id="editProfileForm">
+                <div class="flex flex-col items-center">
+                    <img src="../assets/profile.png" id="previewImage" alt="Profile Picture"
+                        class="w-24 h-24 rounded-full object-cover">
 
-    <!-- Script for Toggle Follow Button -->
-    <script>
-        const followButton = document.getElementById('follow-btn');
+                    <label for="profilePic" class="mt-2 text-sm text-blue-400 cursor-pointer hover:underline">Change
+                        Profile Picture</label>
+                    <input type="file" id="profilePic" name="profilePic" accept="image/*" class="hidden">
 
-        followButton.addEventListener('click', () => {
-            if (followButton.innerText === 'Follow') {
-                followButton.innerText = 'Unfollow';
-                followButton.classList.remove('bg-blue-600');
-                followButton.classList.add('bg-red-600');
-            } else {
-                followButton.innerText = 'Follow';
-                followButton.classList.remove('bg-red-600');
-                followButton.classList.add('bg-blue-600');
-            }
-        });
-    </script>
-
+                    <button type="button" id="removeProfilePic"
+                        class="text-red-400 text-sm mt-2 hover:underline hidden">
+                        Remove Profile Picture
+                    </button>
+                </div>
+                <div>
+                    <label for="username" class="block text-sm text-gray-300 mb-1">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="name"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 text-sm focus:ring-blue-500"
+                        placeholder="Enter new username">
+                </div>
+                <div>
+                    <label for="bio" class="block text-sm text-gray-300 mb-1">Bio</label>
+                    <textarea id="bio" name="bio"
+                        class="w-full p-2 rounded-lg bg-gray-800 text-white text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Write something about yourself..."></textarea>
+                </div>
+                <div class="flex w-full justify-center">
+                    <button type="submit" id="confirmChanges"
+                        class="w-36 bg-blue-600 hover:bg-blue-700 text-base transition border text-white font-semibold py-2 rounded-lg">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="../js/profile.js"></script>
+    <script src="../js/utils.js"></script>
 </body>
+
 </html>

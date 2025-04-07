@@ -30,6 +30,11 @@ async function loginUser(data) {
 
         const result = await response.json();
         alert(result.message || result.detail);
+        sessionStorage.setItem("userId",result.data.user_id);
+        sessionStorage.setItem("username",result.data.username);
+        if (result.message) {
+            window.location.href = "./profile.html";
+        }
     } catch (error) {
         console.error("Fetch error:", error);
         alert("Something went wrong while logging in.");
