@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
 </head>
-<body>
+
+<body class="bg-gray-900 text-white relative">
     <nav class="bg-gray-800 p-4 shadow-md">
         <div class="max-w-screen-xl mx-auto flex justify-between items-center">
             <a href="index.html" class="text-sm md:text-base font-extrabold text-white hover:text-blue-400 transition">
@@ -42,6 +56,82 @@
             </nav>
         </div>
     </nav>
+    <div id="category-container" class="space-y-8 px-6 py-8"></div>
+    <div id="postModal"
+        class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden justify-center items-center z-50">
+        <div class="w-full max-w-xl bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-2xl relative mx-4 mt-20 mb-20">
+            <i id="close-post"
+                class="absolute top-4 right-5 text-gray-400 hover:text-white text-lg sm:text-xl fa-solid fa-xmark cursor-pointer transition"></i>
+
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-6 text-center">Add New Post</h2>
+
+            <form class="space-y-5" id="postForm">
+                <div>
+                    <label for="postTitle" class="block text-sm text-gray-300 mb-1">Title</label>
+                    <input type="text" id="postTitle" name="postTitle"
+                        class="w-full p-2.5 rounded-lg bg-gray-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                        placeholder="Enter your post title">
+                </div>
+                <div>
+                    <label for="postContent" class="block text-sm text-gray-300 mb-1">Description</label>
+                    <textarea id="postContent" name="postContent"
+                        class="w-full p-2.5 rounded-lg bg-gray-800 text-white text-sm resize-none h-28 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                        placeholder="Write your post..."></textarea>
+                </div>
+                <div>
+                    <label for="postImage" class="block text-sm text-gray-300 mb-1">Upload Image</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*"
+                        class="w-full p-2.5 rounded-lg bg-gray-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                </div>
+                <div>
+                    <label for="tags" class="block text-sm text-gray-300 mb-1">Tags (comma separated)</label>
+                    <input type="text" id="tags" name="tags"
+                        class="w-full p-2.5 rounded-lg bg-gray-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                        placeholder="e.g. html, javascript, webdev">
+                </div>
+                <div>
+                    <label for="category" class="block text-sm text-gray-300 mb-1">Category</label>
+                    <select id="category" name="category"
+                        class="w-full p-2.5 rounded-lg bg-gray-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="general">General Discussion</option>
+                        <option value="announcements">Announcements</option>
+                        <option value="questions">Questions & Answers</option>
+                        <option value="feedback">Feedback & Suggestions</option>
+                        <option value="support">Technical Support</option>
+                        <option value="guides">Guides & Tutorials</option>
+                        <option value="projects">Projects & Showcases</option>
+                        <option value="career">Career / Jobs / Internships</option>
+                        <option value="events">Events / Meetups</option>
+                        <option value="news">News & Updates</option>
+                        <option value="webdev">Web Development</option>
+                        <option value="appdev">App Development</option>
+                        <option value="gamedev">Game Development</option>
+                        <option value="ai_ml">AI & Machine Learning</option>
+                        <option value="cybersecurity">Cybersecurity</option>
+                        <option value="opensource">Open Source</option>
+                        <option value="programming">Programming Help</option>
+                        <option value="college">College / Academics</option>
+                        <option value="lifestyle">Lifestyle & Wellness</option>
+                        <option value="fun">Memes / Fun</option>
+                        <option value="offtopic">Off Topic</option>
+                    </select>
+                </div>
+                <div class="flex justify-center pt-2">
+                    <button type="submit"
+                        class="w-40 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow-md text-sm tracking-wide">
+                        Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="addPost"
+        class="fixed bottom-6 right-6 flex items-center justify-center border bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg cursor-pointer transition w-8 h-8 sm:w-12 sm:h-12">
+        <i class="fa-solid fa-plus text-sm md:text-base"></i>
+    </div>
     <script src="../js/utils.js"></script>
+    <script src="../js/explore.js"></script>
 </body>
+
 </html>
