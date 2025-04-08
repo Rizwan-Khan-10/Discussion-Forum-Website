@@ -21,14 +21,7 @@ class UserProfileRequest(BaseModel):
 
 async def get_user_profile(user_id: str, db: Session):
     try:
-        all_profiles = db.query(UserProfile).all()
-        matched_profile = None
-
-        for profile in all_profiles:
-            decrypted_user_id = DecryptionMiddleware.decrypt({"user_id": profile.user_id}).get("user_id")
-            if decrypted_user_id == user_id:
-                matched_profile = profile
-                break
+        matched_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
 
         if not matched_profile:
             raise APIError(status_code=404, detail="User profile not found.")
@@ -77,25 +70,18 @@ async def get_user_profile(user_id: str, db: Session):
 
 async def update_user_profile(user_id: str, username: str, bio: Optional[str], profilePic: Optional[UploadFile], db: Session):
     try:
-        matched_user = None
-        all_users = db.query(User).all()
-
-        for usr in all_users:
-            decrypted_user_id = DecryptionMiddleware.decrypt({"user_id": usr.user_id})["user_id"]
-            if decrypted_user_id == user_id:
-                matched_user = usr
-                break
-
+        matched_user = db.query(User).filter(User.user_id == user_id).first()
         if not matched_user:
             raise APIError(status_code=404, detail="User not found.")
 
-        profile = db.query(UserProfile).filter(UserProfile.user_id == matched_user.user_id).first()
+        profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
         if not profile:
             raise APIError(status_code=404, detail="User profile not found.")
 
         decrypted_current_username = DecryptionMiddleware.decrypt({"username": matched_user.username})["username"]
 
         if decrypted_current_username != username:
+            all_users = db.query(User).all()
             for usr in all_users:
                 decrypted_username = DecryptionMiddleware.decrypt({"username": usr.username})["username"]
                 if decrypted_username == username:
@@ -125,7 +111,7 @@ async def update_user_profile(user_id: str, username: str, bio: Optional[str], p
                 delete_file(profile.img)
 
             secure_url, public_id = upload_file(file_location)
-            profile.img = EncryptionMiddleware.encrypt({"img": public_id})["img"]
+            profile.img = EncryptionMiddleware.encrypt({"img": secure_url})["img"]
             image_url = secure_url
 
             print(f"[DEBUG] Image uploaded. URL: {image_url}, public_id: {public_id}")

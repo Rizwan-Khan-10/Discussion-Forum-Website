@@ -16,15 +16,15 @@ cloudinary.config(
 def upload_file(file_path, public_id=None):
     try:
         upload_result = cloudinary.uploader.upload(file_path, public_id=public_id)
-        return upload_result.get('secure_url', ''), upload_result.get('public_id', '')  
+
+        cloud_name = cloudinary.config().cloud_name
+        file_format = upload_result.get('format', 'jpg') 
+
+        clean_url = f"https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.{file_format}"
+
+        return clean_url, upload_result.get('public_id', '')  
     except Exception:
         return None, None
-
-def retrieve_file(public_id):
-    try:
-        return cloudinary.utils.cloudinary_url(public_id, secure=True)[0]  
-    except Exception:
-        return None
 
 def delete_file(public_id):
     try:

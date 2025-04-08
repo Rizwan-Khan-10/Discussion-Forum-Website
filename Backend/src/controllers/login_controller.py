@@ -27,11 +27,10 @@ async def register_user(request, db: Session):
             "email": request.email
         })
 
-        raw_user_id = str(uuid.uuid4())
-        encrypted_user_id = EncryptionMiddleware.encrypt({"user_id": raw_user_id})["user_id"]
+        raw_user_id = str(uuid.uuid4()) 
 
         new_user = User(
-            user_id=encrypted_user_id,
+            user_id=raw_user_id,  
             username=encrypted_data["username"],
             email=encrypted_data["email"],
             password=hash_password(request.password),
@@ -59,7 +58,7 @@ async def register_user(request, db: Session):
         })
 
         user_profile = UserProfile(
-            user_id=encrypted_user_id,
+            user_id=raw_user_id, 
             bio=encrypted_profile_data["bio"],
             img=encrypted_profile_data["img"],
             followers=encrypted_profile_data["followers"],
@@ -103,16 +102,13 @@ async def authenticate_user(request, db: Session):
         if not matched_user or not verify_password(request.password, matched_user.password):
             raise APIError(status_code=401, detail="Invalid email or password.")
 
-        decrypt_data = DecryptionMiddleware.decrypt({
-            "username": matched_user.username,
-            "user_id": matched_user.user_id
-        })
+        decrypted_username = DecryptionMiddleware.decrypt({"username": matched_user.username})["username"]
 
         return APIResponse.success(
             data={
-                "user_id": decrypt_data["user_id"],
-                "username": decrypt_data["username"]
-            }, 
+                "user_id": matched_user.user_id,  
+                "username": decrypted_username
+            },
             message="Login successful"
         )
 

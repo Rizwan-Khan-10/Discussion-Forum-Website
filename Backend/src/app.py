@@ -19,6 +19,7 @@ from models.report import Base as ReportBase
 from models.savedThread import Base as SavedThreadBase
 from routes.login_route import login_router
 from routes.user_route import profile_router
+from routes.post_route import post_router
 
 app = FastAPI()
 
@@ -32,9 +33,11 @@ app.add_middleware(
 
 UserBase.metadata.create_all(bind=engine) 
 UserProfileBase.metadata.create_all(bind=engine)    
+PostBase.metadata.create_all(bind=engine)    
 
 app.include_router(login_router, prefix="/user", tags=["User"])
 app.include_router(profile_router, prefix="/profile", tags=["UserProfile"])
+app.include_router(post_router, prefix="/post", tags=["Post"])
 
 @app.get("/")
 def home():

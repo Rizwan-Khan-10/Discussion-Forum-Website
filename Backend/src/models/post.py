@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from base import Base  
 
@@ -11,16 +11,18 @@ class Post(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     category_id = Column(String, ForeignKey("categories.category_id"), nullable=False)
+    image_url = Column(String, nullable=True)
     tags = Column(String, nullable=True)
-    upvotes = Column(String, nullable=True)
-    downvotes = Column(String, nullable=True)
-    comments = Column(String, nullable=True)
-    bookmark = Column(String, nullable=True)
-    shared = Column(String, nullable=True)
-    report = Column(String, nullable=True)
-    followed = Column(String, nullable=True)
-    is_pinned = Column(String, default=False)
-    is_locked = Column(String, default=False)
+    upvotes = Column(String, default="0")
+    downvotes = Column(String, default="0")
+    comment_count = Column(String, default="0") 
+    bookmark = Column(String, default="0")
+    shared = Column(String, default="0")
+    report = Column(String, default="0")
+    followed = Column(String, default="0")
+    views = Column(String, default="0")
+    is_pinned = Column(String, default="False")
+    is_locked = Column(String, default="False")
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
     
