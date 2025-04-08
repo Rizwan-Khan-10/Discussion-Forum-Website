@@ -87,40 +87,42 @@ async def update_user_profile(user_id: str, username: str, bio: Optional[str], p
                 if decrypted_username == username:
                     raise APIError(status_code=400, detail="Username already taken.")
             matched_user.username = EncryptionMiddleware.encrypt({"username": username})["username"]
+            db.add(matched_user)
 
         if bio is not None:
-            profile.bio = None if bio.strip() == "" else EncryptionMiddleware.encrypt({"bio": bio})["bio"]
+            bio = None if bio.strip() == "" else EncryptionMiddleware.encrypt({"bio": bio})["bio"]
+            profile.bio = bio
+            db.add(profile)
 
         image_url = None
         if profilePic:
-            try:
-                BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-                TEMP_DIR = os.path.join(BASE_DIR, "backend", "public", "temp")
-                os.makedirs(TEMP_DIR, exist_ok=True)
-                print(f"[DEBUG] Temp directory ensured at: {TEMP_DIR}")
-            except Exception as folder_err:
-                raise APIError(status_code=500, detail=f"Failed to create upload folder: {str(folder_err)}")
-
-            print("[DEBUG] Starting profile picture upload...")
+            BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+            TEMP_DIR = os.path.join(BASE_DIR, "backend", "public", "temp")
+            os.makedirs(TEMP_DIR, exist_ok=True)
 
             file_location = os.path.join(TEMP_DIR, profilePic.filename)
             with open(file_location, "wb") as f:
                 f.write(await profilePic.read())
 
             if profile.img:
-                delete_file(profile.img)
+                decrypted_img_url = DecryptionMiddleware.decrypt({"img": profile.img})["img"]
+                old_public_id = "/".join(decrypted_img_url.split("/")[-2:]).split(".")[0]
+                delete_file(old_public_id)
 
-            secure_url, public_id = upload_file(file_location)
+            public_id = f"profile_pics/{user_id}"
+            secure_url, _ = upload_file(file_location, public_id=public_id)
             profile.img = EncryptionMiddleware.encrypt({"img": secure_url})["img"]
             image_url = secure_url
-
-            print(f"[DEBUG] Image uploaded. URL: {image_url}, public_id: {public_id}")
+            db.add(profile)
 
             os.remove(file_location)
 
         elif profilePic is None and profile.img:
-            delete_file(DecryptionMiddleware.decrypt({"img": profile.img})["img"])
+            decrypted_img_url = DecryptionMiddleware.decrypt({"img": profile.img})["img"]
+            old_public_id = "/".join(decrypted_img_url.split("/")[-2:]).split(".")[0]
+            delete_file(old_public_id)
             profile.img = None
+            db.add(profile)
 
         db.commit()
         db.refresh(profile)
@@ -133,8 +135,6 @@ async def update_user_profile(user_id: str, username: str, bio: Optional[str], p
             )
         }
 
-        print(f"[DEBUG] Sending profile update response: {response_data}")
-
         return APIResponse.success(
             message="Profile updated successfully",
             data=response_data
@@ -143,7 +143,6 @@ async def update_user_profile(user_id: str, username: str, bio: Optional[str], p
     except APIError as e:
         raise e
     except Exception as e:
-        print(f"[ERROR] Unexpected error: {str(e)}")
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 async def delete_user_profile(user_id: str, db: Session):

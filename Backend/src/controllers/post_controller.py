@@ -24,9 +24,12 @@ class PostRequest(BaseModel):
     category: str
     tags: Optional[str] = None
 
-class UpdatePostRequest(BaseModel):
+class EditRequest(BaseModel):
+    post_id: str
     title: Optional[str] = None
     content: Optional[str] = None
+    category: str
+    tags: Optional[str] = None
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
 TEMP_DIR = os.path.join(BASE_DIR, "backend", "public", "temp")
@@ -239,27 +242,6 @@ async def get_post_by_id(user_id: str, db: Session):
     except Exception as e:
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-async def update_post(post_id: str, request: UpdatePostRequest, db: Session):
-    try:
-        post = db.query(Post).filter(Post.post_id == post_id).first()
-        if not post:
-            raise APIError(status_code=404, detail="Post not found.")
-
-        request_data = request.model_dump(exclude_unset=True)
-        encrypted_data = EncryptionMiddleware.encrypt(request_data)
-
-        for key, value in encrypted_data.items():
-            setattr(post, key, value)
-
-        post.updated_at = datetime.datetime.utcnow()
-        db.commit()
-        db.refresh(post)
-
-        return APIResponse.success(data=post, message="Post updated successfully.")
-    except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
 async def pin_post(post_id: str, is_pinned: str, db: Session):
     try:
         post = db.query(Post).filter(Post.post_id == post_id).first()
@@ -293,7 +275,7 @@ async def lock_post(post_id: str, is_locked: str, db: Session):
 async def delete_post(post_id: str, user_id: str, username: str, db: Session):
     try:
         post = db.query(Post).filter(Post.post_id == post_id, Post.user_id == user_id).first()
-        
+
         if not post:
             raise APIError(status_code=404, detail="Post not found or you don't have permission to delete this post.")
 
@@ -301,12 +283,27 @@ async def delete_post(post_id: str, user_id: str, username: str, db: Session):
         if decrypted_username != username:
             raise APIError(status_code=403, detail="Username mismatch. You are not authorized to delete this post.")
 
-        delete_file(post_id)
+        image_url = DecryptionMiddleware.decrypt({"image_url": post.image_url}).get("image_url") if post.image_url else None
+        if image_url and "cloudinary" in image_url:
+            delete_file(post_id)
+
+        user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
+        if user_profile:
+            decrypted = DecryptionMiddleware.decrypt({
+                "reputation": user_profile.reputation or EncryptionMiddleware.encrypt({"temp": "0"})["temp"]
+            })
+
+            reputation = int(decrypted.get("reputation") or 0) - 5
+
+            encrypted_updates = EncryptionMiddleware.encrypt({
+                "reputation": str(reputation)
+            })
+            user_profile.reputation = encrypted_updates.get("reputation")
 
         db.delete(post)
         db.commit()
 
-        return APIResponse.success(data=[post_id],message="Post deleted successfully.")
+        return APIResponse.success(data=[post_id], message="Post deleted successfully.")
 
     except Exception as e:
         db.rollback()
@@ -326,4 +323,106 @@ async def get_posts(category_id: str = None, db: Session = None):
         return APIResponse.success(data=posts, message="Posts retrieved successfully.")
 
     except Exception as e:
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+async def edit_post(request: EditRequest, postImage: UploadFile, db: Session):
+    try:
+        post = db.query(Post).filter_by(post_id=request.post_id).first()
+        if not post:
+            raise APIError(status_code=404, detail="Post not found.")
+
+        category_map = {
+            "general": "General Discussion", "announcements": "Announcements",
+            "questions": "Questions & Answers", "feedback": "Feedback & Suggestions",
+            "support": "Technical Support", "guides": "Guides & Tutorials",
+            "projects": "Projects & Showcases", "career": "Career / Jobs / Internships",
+            "events": "Events / Meetups", "news": "News & Updates",
+            "webdev": "Web Development", "appdev": "App Development",
+            "gamedev": "Game Development", "ai_ml": "AI & Machine Learning",
+            "cybersecurity": "Cybersecurity", "opensource": "Open Source",
+            "programming": "Programming Help", "college": "College / Academics",
+            "lifestyle": "Lifestyle & Wellness", "fun": "Memes / Fun", "offtopic": "Off Topic"
+        }
+
+        if request.category not in category_map:
+            raise APIError(status_code=400, detail="Invalid category identifier.")
+
+        actual_category_name = category_map[request.category]
+        category = db.query(Category).filter_by(category_name=actual_category_name).first()
+        if not category:
+            raise APIError(status_code=400, detail="Category not found.")
+
+        updated_fields = {}
+        if request.title:
+            updated_fields["title"] = request.title
+        if request.content:
+            updated_fields["content"] = request.content
+
+        if request.tags is None:
+            post.tags = None
+        elif request.tags is not None:
+            encrypted_tags = EncryptionMiddleware.encrypt({"tags": request.tags})
+            post.tags = encrypted_tags.get("tags")
+
+        image_url_encrypted = post.image_url
+        image_url = DecryptionMiddleware.decrypt({"image_url": image_url_encrypted}).get("image_url") if image_url_encrypted else None
+        delete_old_image = False
+
+        if postImage:
+            file_ext = os.path.splitext(postImage.filename)[-1]
+            BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+            TEMP_DIR = os.path.join(BASE_DIR, "backend", "public", "temp")
+            os.makedirs(TEMP_DIR, exist_ok=True)
+
+            temp_path = os.path.join(TEMP_DIR, f"{request.post_id}{file_ext}")
+            with open(temp_path, "wb") as f:
+                content = await postImage.read()
+                f.write(content)
+
+            public_id = f"post_images/{request.post_id}"
+            secure_url, _ = upload_file(temp_path, public_id=public_id)
+            os.remove(temp_path)
+
+            if secure_url:
+                if image_url and "cloudinary" in image_url:
+                    delete_file(f"post_images/{request.post_id}")
+                image_url = secure_url
+
+        elif postImage is None and image_url:
+            if "cloudinary" in image_url:
+                delete_file(f"post_images/{request.post_id}")
+            image_url = None
+
+        if updated_fields:
+            encrypted_updated_fields = EncryptionMiddleware.encrypt(updated_fields)
+            for field, value in encrypted_updated_fields.items():
+                setattr(post, field, value)
+
+        post.category_id = category.category_id
+        post.image_url = (
+            EncryptionMiddleware.encrypt({"image_url": image_url}).get("image_url")
+            if image_url is not None else None
+        )
+        post.updated_at = datetime.datetime.now(datetime.timezone.utc)
+
+        db.commit()
+        db.refresh(post)
+
+        response_data = {"post_id": post.post_id}
+        if "title" in updated_fields:
+            response_data["title"] = updated_fields["title"]
+        if "content" in updated_fields:
+            response_data["content"] = updated_fields["content"]
+        if request.tags is not None:
+            response_data["tags"] = request.tags
+        elif request.tags is None:
+            response_data["tags"] = None
+        if image_url is not None:
+            response_data["image_url"] = image_url
+        elif image_url is None:
+            response_data["image_url"] = None
+
+        return APIResponse.success(data=response_data, message="Post edited successfully.")
+    except Exception as e:
+        db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")

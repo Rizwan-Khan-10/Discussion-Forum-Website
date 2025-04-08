@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db.connection import get_db
 from controllers.post_controller import (
-    create_post, get_post_by_id, update_post,
-    pin_post, lock_post, report_post, get_posts,delete_post
+    create_post, get_post_by_id,
+    pin_post, lock_post, edit_post, get_posts,delete_post
 )
-from controllers.post_controller import PostRequest, UpdatePostRequest
+from controllers.post_controller import PostRequest
 from pydantic import BaseModel
 from fastapi import Form, File, UploadFile
 from typing import Optional
@@ -16,6 +16,13 @@ class PostRequest(BaseModel):
     user_id: str
     title: str
     content: str
+    category: str
+    tags: Optional[str] = None
+
+class EditRequest(BaseModel):
+    post_id: str
+    title: Optional[str] = None
+    content: Optional[str] = None
     category: str
     tags: Optional[str] = None
 
@@ -53,10 +60,6 @@ async def get_post_by_id_api(payload: dict, db: Session = Depends(get_db)):
     user_id = payload.get("user_id")
     return await get_post_by_id(user_id, db)
 
-@post_router.put("/posts/{post_id}")
-async def update_post_api(post_id: str, request: UpdatePostRequest, db: Session = Depends(get_db)):
-    return await update_post(post_id, request, db)
-
 @post_router.post("/pinUnpin")
 async def pin_post_api(post_action: PostAction, db: Session = Depends(get_db)):
     return await pin_post(post_action.post_id, post_action.is_pinned, db)
@@ -72,3 +75,22 @@ async def delete_post_api(delete_action: DeleteAction, db: Session = Depends(get
 @post_router.get("/posts")
 async def get_random_or_category_posts_api(category_id: str = None, db: Session = Depends(get_db)):
     return await get_posts(category_id, db)
+
+@post_router.post("/editPost")
+async def edit_post_api(
+    post_id: str = Form(...),
+    title: str = Form(...),
+    content: str = Form(...),
+    category: str = Form(...),
+    tags: str = Form(""), 
+    postImage: UploadFile = File(None), 
+    db: Session = Depends(get_db)
+):
+    request = EditRequest(
+        post_id=post_id,
+        title=title,
+        content=content,
+        category=category,
+        tags=tags if tags else None,
+    )
+    return await edit_post(request, postImage, db)

@@ -20,6 +20,7 @@ const myDiv = document.getElementById("profile");
 const usernameInput = document.getElementById("username");
 let selectedPostId = null;
 let selectedUserId = null;
+let PostID = "";
 
 usernameInput.addEventListener("input", function () {
     this.value = this.value.replace(/\s/g, "");
@@ -372,6 +373,7 @@ function handleMenuAction(action, postId, userId) {
     menu.classList.add("hidden");
     switch (action) {
         case 'edit':
+            openEditPostModal(postId);
             break;
         case 'delete':
             deletePost(postId);
@@ -394,6 +396,10 @@ function handleMenuAction(action, postId, userId) {
 
 const postForm = document.getElementById("postForm");
 const postImageInput = document.getElementById("postImage");
+
+document.getElementById("tags").addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/\s/g, '');
+});
 
 postForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -588,15 +594,125 @@ async function deletePost(postId) {
 
         const data = await response.json();
         if (data.data && data.data.length > 0) {
-            const deletedPostId = data.data[0]; 
+            const deletedPostId = data.data[0];
             let posts = JSON.parse(localStorage.getItem('userPosts')) || [];
-            posts = posts.filter(p => p.post_id !== deletedPostId);  
-            localStorage.setItem('userPosts', JSON.stringify(posts)); 
+            posts = posts.filter(p => p.post_id !== deletedPostId);
+            localStorage.setItem('userPosts', JSON.stringify(posts));
             const storedPosts = JSON.parse(localStorage.getItem("userPosts"));
             displayPosts(storedPosts);
+            let count = document.getElementById("reputation-count").innerText;
+            let correctCount = parseInt(count) - 5;
+            document.getElementById("reputation-count").innerText = correctCount;
         }
-        
     } catch (error) {
         console.error("Error fetching posts:", error);
     }
 }
+
+const openEditPostModal = (postId) => {
+    document.getElementById("editPostModal").classList.remove("hidden");
+    document.getElementById("editPostModal").classList.add("flex");
+
+    const userPosts = JSON.parse(localStorage.getItem("userPosts"));
+    if (!userPosts) return alert("No posts found.");
+
+    const post = userPosts.find(p => p.post_id === postId);
+    if (!post) return alert("Post not found.");
+
+    document.getElementById("editPostTitle").value = post.title || "";
+    document.getElementById("editPostContent").value = post.content || "";
+    document.getElementById("editTags").value = post.tags || "";
+    const categorySelect = document.getElementById("editCategory");
+    const categoryText = post.category_name;
+    for (let option of categorySelect.options) {
+        if (option.text.trim().toLowerCase() === categoryText.trim().toLowerCase()) {
+            categorySelect.value = option.value;
+            break;
+        }
+    }
+    if (post.image_url) {
+        document.getElementById("editPostImagePreview").src = post.image_url;
+        document.getElementById("editImagePreviewContainer").classList.remove("hidden");
+        document.getElementById("editImagePreviewContainer").classList.add("flex");
+        document.getElementById("editImageInputContainer").classList.add("hidden");
+    } else {
+        document.getElementById("editImagePreviewContainer").classList.remove("flex");
+        document.getElementById("editImagePreviewContainer").classList.add("hidden");
+        document.getElementById("editImageInputContainer").classList.remove("hidden");
+    }
+    PostID = postId;
+};
+
+document.getElementById("removeEditImageUrl").addEventListener("click", () => {
+    document.getElementById("editImagePreviewContainer").classList.remove("flex");
+    document.getElementById("editImagePreviewContainer").classList.add("hidden");
+    document.getElementById("editImageInputContainer").classList.remove("hidden");
+    document.getElementById("editPostImagePreview").src = "";
+    document.getElementById("editPostImage").value = "";
+});
+
+const closeEditPostModal = () => {
+    document.getElementById("editPostModal").classList.remove("flex");
+    document.getElementById("editPostModal").classList.add("hidden");
+    PostID = "";
+};
+
+document.getElementById("close-edit-post").addEventListener("click", closeEditPostModal);
+
+document.getElementById("editPostForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("editPostTitle").value.trim();
+    const content = document.getElementById("editPostContent").value.trim();
+    const tags = document.getElementById("editTags").value.trim();
+    const category = document.getElementById("editCategory").value;
+    const postImageFile = document.getElementById("editPostImage").files[0];
+
+    if (!title || !content || !category) return alert("Please fill in all required fields.");
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("content", content);
+    formData.append("category", category);
+    formData.append("tags", tags);
+    formData.append("post_id", PostID);
+
+    if (postImageFile) {
+        formData.append("postImage", postImageFile);
+    } else {
+        const previewSrc = document.getElementById("editPostImagePreview").getAttribute("src");
+        if (previewSrc) {
+            formData.append("previewImage", previewSrc);
+        }
+    }
+
+
+    try {
+        const res = await fetch("http://localhost:8000/post/editPost", {
+            method: "POST",
+            body: formData,
+        });
+
+        let result;
+        try {
+            result = await res.json();
+        } catch (parseErr) {
+            console.error("Failed to parse JSON:", parseErr);
+            return alert("Invalid server response.");
+        }
+
+        if (res.ok) {
+            alert("Post updated successfully!");
+            document.getElementById("editPostForm").reset();
+            document.getElementById("editPostModal").classList.remove("flex");
+            document.getElementById("editPostModal").classList.add("hidden");
+        } else {
+            alert(result.details || "Post update failed.");
+        }
+
+    } catch (err) {
+        console.error("Error during fetch:", err);
+        alert("Something went wrong: " + (err.details || err.message));
+    }
+    PostID = "";
+});
