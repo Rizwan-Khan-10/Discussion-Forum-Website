@@ -8,13 +8,13 @@ window.addEventListener("DOMContentLoaded", function () {
     const date = timestamp.toLocaleDateString();
     const time = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const editedBadge = postData.edited
+    const editedBadge = postData.edited === true
         ? `<div class="absolute bottom-36 right-4 bg-yellow-500 text-black text-xs sm:text-sm px-2 py-0.5 rounded">Edited</div>`
         : "";
 
     const html = `
         <div class="w-full relative">
-    <img src="${postData.image_url}" alt="Image" class="rounded-xl mb-3 sm:mb-4 w-full max-h-72 object-cover border-b">
+    <img src="${postData.image_url}" onerror="this.onerror=null;this.src='../assets/profile.png';" alt="Image" class="rounded-xl mb-3 sm:mb-4 w-full max-h-72 object-cover border-b">
     ${editedBadge}
     <h2 class="text-lg sm:text-xl font-bold mb-2 break-words px-6">${postData.title}</h2>
     <p class="text-gray-300 mb-4 text-sm sm:text-base leading-relaxed break-words px-6">
@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", function () {
             <span class="text-gray-500">${date}, ${time}</span>
         </div>
         <div class="flex gap-3 mt-2 sm:mt-0">
-            <span class="text-blue-400 hover:text-blue-300 text-base">
+            <span class="text-red-500 hover:text-red-600 text-base">
                 <i class="fa-solid fa-flag"></i>
             </span>
         </div>
@@ -56,13 +56,13 @@ window.addEventListener("DOMContentLoaded", function () {
                 <span id="downvote-count">${postData.downvotes}</span>
             </div>
             <div class="flex flex-col items-center">
-                <span class="text-cyan-400 text-sm sm:text-base">
+                <span class="text-cyan-600 text-sm sm:text-base">
                     <i class="fa-regular fa-eye"></i>
                 </span>
                 <span id="view-count">${postData.views}</span>
             </div>
             <div class="flex flex-col items-center">
-                <span class="text-blue-400 text-sm sm:text-base">
+                <span class="text-purple-800 text-sm sm:text-base">
                     <i class="fa-regular fa-comment-dots"></i>
                 </span>
                 <span id="comment-count">${postData.comment_count}</span>
@@ -82,7 +82,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 <span id="bookmark-count">${postData.bookmark_count}</span>
             </div>
             <div class="flex flex-col items-center">
-                <span class="text-blue-400 hover:text-blue-300 text-sm sm:text-base">
+                <span class="text-emerald-400 hover:text-blue-300 text-sm sm:text-base">
                     <i id="followed-icon" class="fa-regular fa-square-plus"></i>
                 </span>
                 <span id="followed-count">${postData.followed}</span>
@@ -127,6 +127,22 @@ window.addEventListener("DOMContentLoaded", function () {
     document.getElementById("followed-count").parentElement.addEventListener("click", function () {
         addToFollowThread(postData.post_id, true);
     });
+    if (postData.is_locked === "True") {
+        const commentInput = document.getElementById("comment-input");
+        if (commentInput) {
+            commentInput.remove();
+        }
+        const commentContainer = document.getElementById("comment-container");
+        if (commentContainer) {
+            commentContainer.innerHTML = `
+            <div class="text-center text-sm sm:text-base text-red-400 py-4">
+                    Comments are locked for this post.
+                    </div>
+                    `;
+        }
+    } else {
+        getComments(postData.post_id);
+    }
 });
 
 async function addVote(postId, voteType) {
@@ -227,22 +243,20 @@ async function getVote(postId) {
             throw new Error(errorData.detail || "Failed to get vote");
         }
         const responseData = await response.json();
-        if (responseData.data === "upvote") {
-            let count = document.getElementById("upvote-count").innerText;
-            count = parseInt(count) + 1;
-            document.getElementById("upvote-count").innerText = formatCount(count);
+        if (responseData.data.vote_type === "upvote") {
             document.getElementById("upvote-icon").classList.remove("fa-regular");
             document.getElementById("upvote-icon").classList.add("fa-solid");
             document.getElementById("downvote-icon").classList.remove("fa-solid");
             document.getElementById("downvote-icon").classList.add("fa-regular");
-        } else if (responseData.data === "downvote") {
-            let count = document.getElementById("downvote-count").innerText;
-            count = parseInt(count) + 1;
-            document.getElementById("downvote-count").innerText = formatCount(count);
+        } else if (responseData.data.vote_type === "downvote") {
             document.getElementById("downvote-icon").classList.remove("fa-regular");
             document.getElementById("downvote-icon").classList.add("fa-solid");
             document.getElementById("upvote-icon").classList.remove("fa-solid");
             document.getElementById("upvote-icon").classList.add("fa-regular");
+        }
+        if (responseData.data) {
+            document.getElementById("upvote-count").innerText = formatCount(responseData.data.upvotes);
+            document.getElementById("downvote-count").innerText = formatCount(responseData.data.downvotes);
         }
     } catch (error) {
         console.error("Error getting vote:", error);
@@ -450,5 +464,552 @@ async function getFollowThread(postId) {
     } catch (error) {
         console.error("Error getting vote:", error);
         return null;
+    }
+}
+
+const container = document.getElementById("comment-container");
+container.innerHTML = "";
+let allComments = [];
+
+function renderComments(comments) {
+    const container = document.getElementById("comment-container");
+    const currentUserId = sessionStorage.getItem("userId");
+
+    comments.forEach(comment => {
+        allComments.push(comment);
+        const div = document.createElement("div");
+        div.className = "bg-gray-900 rounded-lg p-3 relative";
+        div.setAttribute("data-id", comment.comment_id);
+
+        const isOwner = currentUserId === comment.user_id;
+        const displayName = isOwner ? "You" : comment.username;
+
+        let isEdited = false;
+        let rawTime = comment.time;
+        if (rawTime.endsWith(" (edited)")) {
+            isEdited = true;
+            rawTime = rawTime.replace(" (edited)", "");
+        }
+        const timeAgo = formatTimeAgo(rawTime) + (isEdited ? " (edited)" : "");
+
+        let optionsMenu = '';
+        if (isOwner) {
+            optionsMenu = `
+                <button class="edit-btn flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left" data-id="${comment.comment_id}">
+                    <i class="text-blue-400 fas fa-pen text-xs"></i> Edit
+                </button>
+                <button class="delete-btn flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left" data-id="${comment.comment_id}">
+                    <i class="text-red-400 fas fa-trash text-xs"></i> Delete
+                </button>
+            `;
+        } else {
+            optionsMenu = `
+                <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                    <i class="text-red-400 fas fa-flag text-xs"></i> Report
+                </button>
+            `;
+        }
+
+        div.innerHTML = `
+            <div class="flex justify-between">
+                <div class="flex">
+                    <img src="${comment.img}" onerror="this.onerror=null;this.src='../assets/profile.png';" alt="profile" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <p class="text-white font-semibold text-sm">${displayName}</p>
+                        <p class="comment-time text-gray-400 text-xs">${timeAgo}</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <button class="text-gray-300 hover:text-white options-btn text-xl" data-id="${comment.comment_id}">⋮</button>
+                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-32 text-sm">
+                        ${optionsMenu}
+                    </div>
+                </div>
+            </div>
+            <div class="comment-content mt-2 text-gray-200 text-sm">${comment.content}</div>
+            <div class="mt-3 flex items-center space-x-4 text-gray-400 text-sm">
+                <button><i class="text-green-400 fa-regular fa-thumbs-up upvote" data-id="${comment.comment_id}"></i><span class="ml-1 upvote-count">${comment.upvotes || 0}</span></button>
+                <button><i class="text-red-400 fa-regular fa-thumbs-down downvote" data-id="${comment.comment_id}"></i><span class="ml-1 downvote-count">${comment.upvotes || 0}</span></button>
+                <button class="reply-toggle" data-id="${comment.comment_id}">
+                    <i class="text-blue-400 fas fa-reply"></i> Reply (${comment.reply_count || 0})
+                </button>
+            </div>
+            <div class="reply-container hidden mt-4 pl-4 border-l border-gray-600 space-y-4" id="reply-container-${comment.comment_id}">
+            </div>
+        `;
+        getCommentVote(comment.comment_id) ;
+        container.appendChild(div);
+    });
+}
+
+function formatTimeAgo(isoTime) {
+    const time = new Date(isoTime);
+    const now = new Date();
+    const seconds = Math.floor((now - time) / 1000);
+
+    if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Yesterday";
+    if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`;
+    const years = Math.floor(months / 12);
+    return `${years} year${years !== 1 ? 's' : ''} ago`;
+}
+
+document.addEventListener("click", function (e) {
+    if (e.target.closest(".options-btn")) {
+        const btn = e.target.closest(".options-btn");
+        const menu = btn.nextElementSibling;
+        const isHidden = menu.classList.contains("hidden");
+
+        document.querySelectorAll(".options-menu").forEach(m => m.classList.add("hidden"));
+
+        if (isHidden) {
+            menu.classList.remove("hidden");
+        } else {
+            menu.classList.add("hidden");
+        }
+        return;
+    }
+
+    if (e.target.closest(".edit-btn")) {
+        const commentId = e.target.closest(".edit-btn").dataset.id;
+        handleEditComment(commentId);
+        document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
+        return;
+    }
+
+    if (e.target.closest(".upvote")) {
+        const commentId = e.target.closest(".upvote").dataset.id;
+        addVoteToComment(commentId,"upvote");
+        return;
+    }
+
+    if (e.target.closest(".downvote")) {
+        const commentId = e.target.closest(".downvote").dataset.id;
+        addVoteToComment(commentId,"downvote");
+        return;
+    }
+
+    if (e.target.closest(".delete-btn")) {
+        const commentId = e.target.closest(".delete-btn").dataset.id;
+        const confirmDelete = confirm("Are you sure you want to delete this comment?");
+        if (confirmDelete) {
+            deleteComment(commentId);
+        }
+        document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
+        return;
+    }
+
+    document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
+
+    if (e.target.closest(".reply-toggle")) {
+        const id = e.target.closest(".reply-toggle").dataset.id;
+        const replyContainer = document.getElementById(`reply-container-${id}`);
+        replyContainer.classList.toggle("hidden");
+
+        if (!replyContainer.dataset.loaded) {
+            const comment = allComments.find(c => c.id == id);
+            if (comment && comment.replies.length > 0) {
+                comment.replies.forEach(reply => addReply(replyContainer, reply));
+            }
+            addReplyInput(replyContainer, id);
+            replyContainer.dataset.loaded = true;
+        }
+    }
+});
+
+function addReply(container, reply) {
+    const div = document.createElement("div");
+    div.className = "flex gap-3";
+
+    div.innerHTML = `
+        <img src="${reply.profile}" alt="profile" class="w-8 h-8 rounded-full mt-1">
+        <div class="flex-1">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-sm text-white font-semibold">${reply.name}</p>
+                    <p class="text-xs text-gray-400 mb-1">${reply.time}</p>
+                </div>
+                <div class="relative">
+                    <button class="text-gray-300 hover:text-white options-btn text-lg">⋮</button>
+                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-28 text-sm">
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-pen text-xs"></i> Edit
+                        </button>
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-trash text-xs"></i> Delete
+                        </button>
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-flag text-xs"></i> Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-200 mb-2">${reply.content}</p>
+            <div class="flex items-center space-x-4 text-gray-400 text-sm">
+                <button><i class="far fa-thumbs-up"></i></button>
+                <button><i class="far fa-thumbs-down"></i></button>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function addReplyInput(container, commentId) {
+    const replyBox = document.createElement("div");
+    replyBox.className = "reply-box mt-3 flex items-start gap-2";
+    replyBox.innerHTML = `
+        <textarea class="flex-1 p-2 rounded bg-gray-800 text-white text-sm" rows="1" placeholder="Write a reply..." id="reply-text-${commentId}"></textarea>
+        <button class="text-blue-400 hover:text-blue-600 mt-1" onclick="submitReply(${commentId})">
+            <i class="fas fa-paper-plane text-lg"></i>
+        </button>
+    `;
+    container.appendChild(replyBox);
+}
+
+function submitReply(commentId) {
+    const textArea = document.getElementById(`reply-text-${commentId}`);
+    const value = textArea.value.trim();
+    if (!value) return;
+
+    const newReply = {
+        name: "You",
+        time: "Just now",
+        content: value,
+        profile: "https://i.pravatar.cc/40?img=4"
+    };
+
+    const container = document.getElementById(`reply-container-${commentId}`);
+    const replyBox = container.querySelector(".reply-box");
+    container.insertBefore(buildReplyElement(newReply), replyBox);
+    textArea.value = "";
+}
+
+function buildReplyElement(reply) {
+    const div = document.createElement("div");
+    div.className = "flex gap-3";
+
+    div.innerHTML = `
+        <img src="${reply.profile}||../assets/profile.png" alt="profile" class="w-8 h-8 rounded-full mt-1">
+        <div class="flex-1">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-sm text-white font-semibold">${reply.name}</p>
+                    <p class="text-xs text-gray-400 mb-1">${reply.time}</p>
+                </div>
+                <div class="relative">
+                    <button class="text-gray-300 hover:text-white options-btn text-lg">⋮</button>
+                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-28 text-sm">
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-pen text-xs"></i> Edit
+                        </button>
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-trash text-xs"></i> Delete
+                        </button>
+                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-flag text-xs"></i> Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-200 mb-2">${reply.content}</p>
+            <div class="flex items-center space-x-4 text-gray-400 text-sm">
+                <button><i class="far fa-thumbs-up"></i></button>
+                <button><i class="far fa-thumbs-down"></i></button>
+            </div>
+        </div>
+    `;
+    return div;
+}
+
+document.getElementById("postComment").addEventListener("click", postComment);
+
+async function postComment() {
+    const textarea = document.getElementById("new-comment");
+    const comment = textarea.value.trim();
+
+    if (!comment) {
+        alert("Comment can't be empty.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:8000/comment/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: comment, user_id: sessionStorage.getItem("userId"), post_id: JSON.parse(localStorage.getItem("selectedPost")).post_id })
+        });
+
+        const result = await response.json();
+
+        if (result) {
+            renderComments([result.data]);
+            let count = document.getElementById("comment-count").innerText;
+            count = parseInt(count) + 1;
+            document.getElementById("comment-count").innerText = formatCount(count);
+            textarea.value = "";
+        } else {
+            console.error("Failed to post comment:", result.message);
+            alert("Failed to post comment.");
+        }
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        alert("Something went wrong. Please try again.");
+    }
+}
+
+async function getComments(postId) {
+    try {
+        const response = await fetch("http://localhost:8000/comment/get", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ post_id: postId })
+        });
+
+        const result = await response.json();
+
+        if (result) {
+            let totalComments = result.data.length;
+            document.getElementById("comment-count").innerText = formatCount(totalComments);
+            renderComments(result.data);
+        } else {
+            console.error("Failed to post comment:", result.message);
+            alert("Failed to post comment.");
+        }
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        alert("Something went wrong. Please try again.");
+    }
+}
+
+async function deleteComment(comment_id) {
+    let post_id = JSON.parse(localStorage.getItem("selectedPost")).post_id;
+    try {
+        const response = await fetch('http://127.0.0.1:8000/comment/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ post_id, comment_id })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to delete comment');
+        }
+        if (data.data) {
+            document.querySelector(`[data-id='${data.data.comment_id}']`).remove();
+            let count = document.getElementById("comment-count").innerText;
+            count = parseInt(count) - 1;
+            document.getElementById("comment-count").innerText = formatCount(count);
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error.message);
+    }
+}
+
+let originalCommentText = "";
+
+function handleEditComment(commentId) {
+    const commentDiv = document.querySelector(`[data-id="${commentId}"]`);
+    if (!commentDiv) {
+        console.error("Comment div not found for id:", commentId);
+        return;
+    }
+
+    const contentEl = commentDiv.querySelector(".comment-content");
+    const originalContent = contentEl.textContent;
+
+    contentEl.setAttribute("data-original", originalContent);
+
+    contentEl.innerHTML = `
+        <textarea id="edit-comment" class="edit-input bg-gray-800 text-white px-2 py-1 rounded w-full resize-none" rows="3">${originalContent}</textarea>
+        <div class="mt-2 space-x-2 text-lg text-right">
+            <i class="confirm-edit fa-solid fa-check cursor-pointer text-green-500 hover:text-green-300"></i>
+            <i class="cancel-edit fa-solid fa-times cursor-pointer text-red-500 hover:text-red-300"></i>
+        </div>
+    `;
+
+    const input = contentEl.querySelector(".edit-input");
+    const confirmBtn = contentEl.querySelector(".confirm-edit");
+    const cancelBtn = contentEl.querySelector(".cancel-edit");
+
+    confirmBtn.addEventListener("click", () => {
+        const newContent = input.value.trim();
+        if (!newContent) {
+            alert("Comment cannot be empty.");
+            return;
+        }
+
+        confirmBtn.classList.add("opacity-50", "pointer-events-none");
+
+        contentEl.innerHTML = newContent;
+        editComment(commentId, newContent);
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        contentEl.textContent = contentEl.getAttribute("data-original");
+    });
+}
+
+function editComment(commentId, newContent) {
+    fetch("http://127.0.0.1:8000/comment/edit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            comment_id: commentId,
+            user_id: sessionStorage.getItem("userId"),
+            post_id: JSON.parse(localStorage.getItem("selectedPost")).post_id,
+            new_content: newContent
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const commentDiv = document.querySelector(`[data-id="${commentId}"]`);
+            const contentEl = commentDiv.querySelector(".comment-content");
+            const timeEl = commentDiv.querySelector(".comment-time");
+
+            contentEl.innerHTML = data.data.content;
+
+            if (timeEl) {
+                const time = data.data.time;
+                const formatted = formatTimeAgo(time);
+                timeEl.innerText = formatted + " (edited)";
+            }
+        } else {
+            alert(data.message || "Failed to edit comment.");
+        }
+    })
+    .catch(err => {
+        console.error("Edit error:", err);
+        alert("Something went wrong.");
+    });
+}
+
+async function addVoteToComment(commentID, voteType) {
+    try {
+        const response = await fetch("http://localhost:8000/voteComment/addVote", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                comment_id: commentID,
+                user_id: sessionStorage.getItem("userId"),
+                vote_type: voteType,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Failed to add vote");
+        }
+
+        const responseData = await response.json();
+
+        const upvoteIcon = document.querySelector(`.upvote[data-id='${commentID}']`);
+        const downvoteIcon = document.querySelector(`.downvote[data-id='${commentID}']`);
+
+        const upvoteCountEl = upvoteIcon.closest("button").querySelector(".upvote-count");
+        const downvoteCountEl = downvoteIcon.closest("button").querySelector(".downvote-count");
+
+        let upvoteCount = parseInt(upvoteCountEl?.textContent.trim() || 0);
+        let downvoteCount = parseInt(downvoteCountEl?.textContent.trim() || 0);
+
+        switch (responseData.message) {
+            case "Upvote added.":
+                upvoteCount++;
+                upvoteIcon.classList.replace("fa-regular", "fa-solid");
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Downvote added.":
+                downvoteCount++;
+                downvoteIcon.classList.replace("fa-regular", "fa-solid");
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Upvote removed.":
+                upvoteCount--;
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Downvote removed.":
+                downvoteCount--;
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Vote updated from upvote to downvote.":
+                upvoteCount--;
+                downvoteCount++;
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                downvoteIcon.classList.replace("fa-regular", "fa-solid");
+                break;
+            case "Vote updated from downvote to upvote.":
+                downvoteCount--;
+                upvoteCount++;
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                upvoteIcon.classList.replace("fa-regular", "fa-solid");
+                break;
+        }
+
+        if (upvoteCountEl) upvoteCountEl.textContent = `${formatCount(upvoteCount)}`;
+        if (downvoteCountEl) downvoteCountEl.textContent = `${formatCount(downvoteCount)}`;
+
+    } catch (error) {
+        console.error("Error adding vote:", error);
+    }
+}
+
+async function getCommentVote(commentId) {
+    try {
+        const response = await fetch("http://localhost:8000/voteComment/getVote", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                comment_id: commentId,
+                user_id: sessionStorage.getItem("userId"),
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Failed to get vote");
+        }
+
+        const responseData = await response.json();
+
+        const upvoteIcon = document.querySelector(`.upvote[data-id='${commentId}']`);
+        const downvoteIcon = document.querySelector(`.downvote[data-id='${commentId}']`);
+        const upvoteCountEl = upvoteIcon.nextSibling;
+        const downvoteCountEl = downvoteIcon.nextSibling;
+
+        if (responseData.data.vote_type === "upvote") {
+            upvoteIcon.classList.replace("fa-regular", "fa-solid");
+            downvoteIcon.classList.replace("fa-solid", "fa-regular");
+        } else if (responseData.data.vote_type === "downvote") {
+            downvoteIcon.classList.replace("fa-regular", "fa-solid");
+            upvoteIcon.classList.replace("fa-solid", "fa-regular");
+        }
+
+        if (responseData.data) {
+            upvoteCountEl.textContent = ` ${formatCount(responseData.data.upvotes)}`;
+            downvoteCountEl.textContent = ` ${formatCount(responseData.data.downvotes)}`;
+        }
+
+    } catch (error) {
+        console.error("Error getting vote:", error);
     }
 }

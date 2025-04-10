@@ -28,8 +28,8 @@ class Post(Base):
     
     user = relationship("User", back_populates="posts")
     category = relationship("Category", back_populates="posts")
-    comments = relationship("Comment", back_populates="post")
-    bookmark = relationship("Bookmark", back_populates="post")  
-    followThread = relationship("FollowThread", back_populates="post") 
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+    bookmark = relationship("Bookmark", back_populates="post", cascade="all, delete-orphan")  
+    followThread = relationship("FollowThread", back_populates="post", cascade="all, delete-orphan") 
 
 __all__ = ["Post"]

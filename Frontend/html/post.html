@@ -47,16 +47,16 @@
     <div class="flex flex-col md:flex-row gap-4 sm:gap-6 px-4 sm:px-6 my-8">
         <div id="post-container" class="w-full md:w-[40%] flex flex-col break-words bg-slate-950 rounded-xl border"></div>
         <div class="w-full md:w-[59%] bg-gray-800 p-3 sm:p-4 rounded-xl relative flex flex-col max-h-[90vh] overflow-hidden">
-            <div class="overflow-y-auto pr-2 space-y-6 pb-32 max-h-full break-words">
+            <div id="comment-container" class="overflow-y-auto pr-2 space-y-6 pb-32 max-h-full break-words">
                 <p class="text-gray-400 text-sm">No comments yet.</p>
             </div>
         </div>
     </div>
-    <div class="fixed bottom-4 right-[5%] w-[90%] sm:w-[80%] sm:right-[10%] md:bottom-4 md:right-12 md:w-[50%] bg-gray-950 p-3 border rounded-lg z-50">
+    <div id="comment-input" class="fixed bottom-4 right-[5%] w-[90%] sm:w-[80%] sm:right-[10%] md:bottom-4 md:right-12 md:w-[50%] bg-gray-950 p-3 border rounded-lg z-50">
         <div class="w-full flex items-center gap-3">
             <textarea placeholder="Write a comment..." id="new-comment"
                 class="h-10 flex-grow p-2 rounded-md bg-slate-900 border text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            <div
+            <div id="postComment"
                 class="bg-blue-600 hover:bg-blue-700 border text-sm w-10 h-10 rounded-lg flex justify-center items-center cursor-pointer">
                 <i class="fa-solid fa-plus"></i>
             </div>

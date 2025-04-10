@@ -80,9 +80,24 @@ async def add_vote_controller(post_id: str, user_id: str, vote_type: str, db: Se
 async def get_vote_controller(post_id: str, user_id: str, db: Session):
     try:
         vote = db.query(Vote).filter_by(post_id=post_id, user_id=user_id).first()
+        post = db.query(Post).filter_by(post_id=post_id).first()
+
+        if not post:
+            raise APIError(status_code=404, detail="Post not found")
+
+        vote_type = None
         if vote:
-            return APIResponse.success(data=DecryptionMiddleware.decrypt({"vote_type": vote.vote_type}).get("vote_type"))
-        return APIResponse.success(data=None)
+            vote_type = DecryptionMiddleware.decrypt({"vote_type": vote.vote_type}).get("vote_type")
+        
+        decrypted_upvotes = DecryptionMiddleware.decrypt({"upvotes": post.upvotes}).get("upvotes")
+        decrypted_downvotes = DecryptionMiddleware.decrypt({"downvotes": post.downvotes}).get("downvotes")
+
+        return APIResponse.success(data={
+            "vote_type": vote_type,
+            "upvotes": decrypted_upvotes,
+            "downvotes": decrypted_downvotes
+        })
+        
     except APIError as e:
         raise e
     except Exception as e:

@@ -169,6 +169,7 @@ async function getProfile() {
             document.getElementById("upvotes-count").innerText = data.data.total_upvotes;
             document.getElementById("downvotes-count").innerText = data.data.total_downvotes;
             document.getElementById("view-count").innerText = data.data.total_views;
+            document.getElementById("bookmark-count").innerText = data.data.total_bookmarks;
             if (data.data.img) {
                 document.getElementById("profileImg").src = data.data.img;
             } else {
@@ -327,7 +328,7 @@ function createPostCard(postData) {
             </div>
             <div class="mt-4 flex justify-between text-gray-300 border-t border-gray-600 pt-3">
                 <span class="flex items-center gap-1 text-sm hover:text-yellow-300 cursor-pointer">
-                    <i class="fa-regular fa-bookmark text-yellow-300 text-xs"></i><span>${postData.bookmark}</span>
+                    <i class="fa-regular fa-bookmark text-yellow-300 text-xs"></i><span>${postData.bookmark_count}</span>
                 </span>
                 <span class="flex items-center gap-1 text-sm cursor-pointer">
                     <i class="fa-solid fa-share-alt text-lime-300 text-xs"></i><span>${postData.shared}</span>

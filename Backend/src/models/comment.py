@@ -12,12 +12,12 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     upvotes = Column(String, default=0)
     downvotes = Column(String, default=0)
-    replies = Column(String, default=0)
+    reply_count = Column(String, default=0)
     is_pinned = Column(String, default=False)
     created_at = Column(String, nullable=False)
     
     post = relationship("Post", back_populates="comments")
     user = relationship("User", back_populates="comments")
-    replies = relationship("Reply", back_populates="comment")
+    replies = relationship("Reply", back_populates="comment", cascade="all, delete-orphan")
 
 __all__ = [ "Comment"]

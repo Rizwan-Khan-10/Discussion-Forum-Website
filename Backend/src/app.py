@@ -14,6 +14,7 @@ from models.communityUser import Base as CommunityUserBase
 from models.personalChat import Base as PersonalChatBase
 from models.vote import Base as VoteBase
 from models.post import Base as PostBase
+from models.commentVote import Base as CommentVoteBase
 from models.reply import Base as ReplyBase
 from models.report import Base as ReportBase
 from models.bookmark import Base as BookmarkBase   
@@ -24,6 +25,8 @@ from routes.post_route import post_router
 from routes.vote_route import vote_router
 from routes.bookmark_route import bookmark_router
 from routes.followedThread_route import followThread_router
+from routes.comment_route import comment_router
+from routes.commentVote_route import commentVote_router
 
 app = FastAPI()
 
@@ -41,6 +44,8 @@ PostBase.metadata.create_all(bind=engine)
 VoteBase.metadata.create_all(bind=engine)    
 BookmarkBase.metadata.create_all(bind=engine)    
 FollowThreadBase.metadata.create_all(bind=engine)    
+CommentBase.metadata.create_all(bind=engine)    
+CommentVoteBase.metadata.create_all(bind=engine)    
 
 app.include_router(login_router, prefix="/user", tags=["User"])
 app.include_router(profile_router, prefix="/profile", tags=["UserProfile"])
@@ -48,6 +53,8 @@ app.include_router(post_router, prefix="/post", tags=["Post"])
 app.include_router(vote_router, prefix="/vote", tags=["Vote"])
 app.include_router(bookmark_router, prefix="/bookmark", tags=["Bookmark"])
 app.include_router(followThread_router, prefix="/thread", tags=["FollowThread"])
+app.include_router(comment_router, prefix="/comment", tags=["Comment"])
+app.include_router(commentVote_router, prefix="/voteComment", tags=["CommentVote"])
 
 @app.get("/")
 def home():

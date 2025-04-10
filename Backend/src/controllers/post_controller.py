@@ -212,7 +212,7 @@ async def get_post_by_id(user_id: str, db: Session):
             created_at = post.created_at.isoformat()
             updated_at = post.updated_at.isoformat()
             show_date = created_at if post.created_at == post.updated_at else updated_at
-            edited = post.created_at != post.updated_at
+            edited = post.created_at == post.updated_at
 
             post_data = {
                 "user_id": user_id,
@@ -290,18 +290,34 @@ async def delete_post(post_id: str, user_id: str, username: str, db: Session):
         if image_url and "cloudinary" in image_url:
             delete_file(post_id)
 
+        upvotes = int(DecryptionMiddleware.decrypt({"val": post.upvotes}).get("val", "0")) if post.upvotes else 0
+        downvotes = int(DecryptionMiddleware.decrypt({"val": post.downvotes}).get("val", "0")) if post.downvotes else 0
+        bookmarks = int(DecryptionMiddleware.decrypt({"val": post.bookmark_count}).get("val", "0")) if post.bookmark_count else 0
+        shares = int(DecryptionMiddleware.decrypt({"val": post.shared}).get("val", "0")) if post.shared else 0
+        views = int(DecryptionMiddleware.decrypt({"val": post.views}).get("val", "0")) if post.views else 0
+
         user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
         if user_profile:
-            decrypted = DecryptionMiddleware.decrypt({
-                "reputation": user_profile.reputation or EncryptionMiddleware.encrypt({"temp": "0"})["temp"]
-            })
+            fields_to_decrement = {
+                "total_posts": 1,
+                "total_upvotes": upvotes,
+                "total_downvotes": downvotes,
+                "total_bookmarks": bookmarks,
+                "total_shares": shares,
+                "total_views": views,
+                "reputation": 5  
+            }
 
-            reputation = int(decrypted.get("reputation") or 0) - 5
+            updated_data = {}
+            for field, minus_value in fields_to_decrement.items():
+                encrypted_val = getattr(user_profile, field)
+                decrypted_val = DecryptionMiddleware.decrypt({
+                    field: encrypted_val or EncryptionMiddleware.encrypt({field: "0"})[field]
+                }).get(field, "0")
 
-            encrypted_updates = EncryptionMiddleware.encrypt({
-                "reputation": str(reputation)
-            })
-            user_profile.reputation = encrypted_updates.get("reputation")
+                new_val = max(0, int(decrypted_val) - minus_value)
+                encrypted_new_val = EncryptionMiddleware.encrypt({field: str(new_val)}).get(field)
+                setattr(user_profile, field, encrypted_new_val)
 
         db.delete(post)
         db.commit()
@@ -436,19 +452,31 @@ async def count_view(post_id: str, user_id: str, db: Session):
         if not post:
             raise APIError(status_code=404, detail="Post not found.")
 
+        post_views_encrypted = post.views or EncryptionMiddleware.encrypt({"views": "0"})["views"]
+        post_views_decrypted = DecryptionMiddleware.decrypt({"views": post_views_encrypted})
+        current_post_views = int(post_views_decrypted.get("views", "0"))
+        new_post_views = current_post_views + 1
+        post.views = EncryptionMiddleware.encrypt({"views": str(new_post_views)}).get("views")
+
         user = db.query(User).filter(User.user_id == user_id).first()
+        new_user_views = None
+
         if user:
             user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
             if user_profile:
-                decrypted_views = DecryptionMiddleware.decrypt({
-                    "total_views": user_profile.total_views or EncryptionMiddleware.encrypt({"temp": "0"})["temp"]
-                })
-                current_views = int(decrypted_views.get("total_views", "0"))
-                new_views = current_views + 1
-                encrypted_new_views = EncryptionMiddleware.encrypt({"total_views": str(new_views)}).get("total_views")
-                user_profile.total_views = encrypted_new_views
-                db.commit()
-        return APIResponse.success(data=[new_views], message="View count updated successfully.")
+                profile_views_encrypted = user_profile.total_views or EncryptionMiddleware.encrypt({"total_views": "0"})["total_views"]
+                profile_views_decrypted = DecryptionMiddleware.decrypt({"total_views": profile_views_encrypted})
+                current_user_views = int(profile_views_decrypted.get("total_views", "0"))
+                new_user_views = current_user_views + 1
+                user_profile.total_views = EncryptionMiddleware.encrypt({"total_views": str(new_user_views)}).get("total_views")
+
+        db.commit()
+
+        return APIResponse.success(
+            data=[new_post_views],
+            message="View count updated successfully."
+        )
+
     except APIError as e:
         db.rollback()
         raise e
