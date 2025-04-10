@@ -24,6 +24,7 @@ class User(Base):
     personal_chats = relationship("PersonalChat", back_populates="user")
     sent_messages = relationship("ChatMessage", foreign_keys="ChatMessage.sender_id", back_populates="sender")
     received_messages = relationship("ChatMessage", foreign_keys="ChatMessage.receiver_id", back_populates="receiver")
-    saved_threads = relationship("SavedThread", back_populates="user")
+    bookmark = relationship("Bookmark", back_populates="user")
+    followThread = relationship("FollowThread", back_populates="user")
 
 __all__ = [ "User"]

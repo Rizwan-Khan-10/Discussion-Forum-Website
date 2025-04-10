@@ -66,7 +66,7 @@ async def create_post(request: PostRequest, postImage: UploadFile, db: Session):
 
         encrypted_defaults = EncryptionMiddleware.encrypt({
             "upvotes": "0", "downvotes": "0", "comment_count": "0",
-            "bookmark": "0", "shared": "0", "report": "0", "followed": "0",
+            "bookmark_count": "0", "shared": "0", "report": "0", "followed": "0",
             "views": "0", "is_pinned": "False", "is_locked": "False"
         })
 
@@ -96,7 +96,7 @@ async def create_post(request: PostRequest, postImage: UploadFile, db: Session):
             upvotes=encrypted_defaults.get("upvotes"),
             downvotes=encrypted_defaults.get("downvotes"),
             comment_count=encrypted_defaults.get("comment_count"),
-            bookmark=encrypted_defaults.get("bookmark"),
+            bookmark_count=encrypted_defaults.get("bookmark_count"),
             shared=encrypted_defaults.get("shared"),
             report=encrypted_defaults.get("report"),
             followed=encrypted_defaults.get("followed"),
@@ -138,6 +138,8 @@ async def create_post(request: PostRequest, postImage: UploadFile, db: Session):
 
     except Exception as e:
         db.rollback()
+        import traceback
+        print("Error while creating post:", traceback.format_exc())
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
     
 def serialize_post(post):
@@ -148,7 +150,7 @@ def serialize_post(post):
         "upvotes": post.upvotes,
         "downvotes": post.downvotes,
         "comment_count": post.comment_count,
-        "bookmark": post.bookmark,
+        "bookmark_count": post.bookmark_count,
         "shared": post.shared,
         "report": post.report,
         "followed": post.followed,
@@ -165,7 +167,7 @@ def serialize_post(post):
         "upvotes": decrypted.get("upvotes"),
         "downvotes": decrypted.get("downvotes"),
         "comment_count": decrypted.get("comment_count"),
-        "bookmark": decrypted.get("bookmark"),
+        "bookmark_count": decrypted.get("bookmark_count"),
         "shared": decrypted.get("shared"),
         "report": decrypted.get("report"),
         "followed": decrypted.get("followed"),
@@ -198,7 +200,7 @@ async def get_post_by_id(user_id: str, db: Session):
                 "upvotes": post.upvotes,
                 "downvotes": post.downvotes,
                 "comment_count": post.comment_count,
-                "bookmark": post.bookmark,
+                "bookmark_count": post.bookmark_count,
                 "shared": post.shared,
                 "report": post.report,
                 "followed": post.followed,
@@ -210,12 +212,12 @@ async def get_post_by_id(user_id: str, db: Session):
             created_at = post.created_at.isoformat()
             updated_at = post.updated_at.isoformat()
             show_date = created_at if post.created_at == post.updated_at else updated_at
+            edited = post.created_at != post.updated_at
 
             post_data = {
                 "user_id": user_id,
                 "post_id": post.post_id,
-                "user_id": user_id,
-                "username": decrypted_user["username"], 
+                "username": decrypted_user["username"],
                 "title": decrypted["title"],
                 "content": decrypted["content"],
                 "category_id": post.category_id,
@@ -225,14 +227,15 @@ async def get_post_by_id(user_id: str, db: Session):
                 "upvotes": decrypted["upvotes"],
                 "downvotes": decrypted["downvotes"],
                 "comment_count": decrypted["comment_count"],
-                "bookmark": decrypted["bookmark"],
+                "bookmark_count": decrypted["bookmark_count"],
                 "shared": decrypted["shared"],
                 "report": decrypted["report"],
                 "followed": decrypted["followed"],
                 "views": decrypted["views"],
                 "is_pinned": post.is_pinned,
                 "is_locked": post.is_locked,
-                "timestamp": show_date
+                "timestamp": show_date,
+                "edited": edited
             }
 
             result.append(post_data)
@@ -423,6 +426,32 @@ async def edit_post(request: EditRequest, postImage: UploadFile, db: Session):
             response_data["image_url"] = None
 
         return APIResponse.success(data=response_data, message="Post edited successfully.")
+    except Exception as e:
+        db.rollback()
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+async def count_view(post_id: str, user_id: str, db: Session):
+    try:
+        post = db.query(Post).filter(Post.post_id == post_id).first()
+        if not post:
+            raise APIError(status_code=404, detail="Post not found.")
+
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if user:
+            user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
+            if user_profile:
+                decrypted_views = DecryptionMiddleware.decrypt({
+                    "total_views": user_profile.total_views or EncryptionMiddleware.encrypt({"temp": "0"})["temp"]
+                })
+                current_views = int(decrypted_views.get("total_views", "0"))
+                new_views = current_views + 1
+                encrypted_new_views = EncryptionMiddleware.encrypt({"total_views": str(new_views)}).get("total_views")
+                user_profile.total_views = encrypted_new_views
+                db.commit()
+        return APIResponse.success(data=[new_views], message="View count updated successfully.")
+    except APIError as e:
+        db.rollback()
+        raise e
     except Exception as e:
         db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")

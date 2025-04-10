@@ -44,207 +44,25 @@
             </nav>
         </div>
     </nav>
-    <div class="flex flex-col md:flex-row gap-6 p-4 sm:p-6 mt-3">
-        <div class="w-full md:w-2/5">
-            <img src="https://via.placeholder.com/600x300" alt="Post Image" class="rounded-xl mb-4 w-full">
-            <h2 class="text-xl font-bold mb-2">How to Build a Responsive Layout in Tailwind</h2>
-            <p class="text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">
-                Here’s a step-by-step guide to building responsive layouts in Tailwind CSS...
-            </p>
-            <div class="flex justify-between items-center text-sm text-gray-400 mb-4">
-                <div>
-                    Posted by <span class="text-blue-400 font-medium">@uiMaster</span> · 2h ago
-                </div>
-                <div>
-                    <span class="text-blue-400 hover:text-blue-300 text-base">
-                        <i class="fa-solid fa-user-plus"></i>
-                    </span>
-                    <span class="text-red-500 hover:text-red-400 ml-2">
-                        <i class="fa-solid fa-flag"></i>
-                    </span>
-                </div>
-            </div>
-            <div class="mb-3">
-                <div class="text-xs font-semibold text-gray-400 mb-1">Category:</div>
-                <div class="bg-gray-700 inline-block px-3 py-1 rounded-full text-blue-300 text-xs">Web Design</div>
-            </div>
-            <div class="mb-4">
-                <div class="text-xs font-semibold text-gray-400 mb-1">Tags:</div>
-                <div class="flex flex-wrap gap-2 text-xs">
-                    <span class="bg-gray-700 px-3 py-1 rounded-full text-green-300">#Tailwind</span>
-                    <span class="bg-gray-700 px-3 py-1 rounded-full text-yellow-300">#CSS</span>
-                    <span class="bg-gray-700 px-3 py-1 rounded-full text-purple-300">#UI</span>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-4 border-t border-gray-700 pt-4 text-sm text-gray-300">
-                <span class="flex items-center gap-1 text-green-400 hover:text-green-300">
-                    <i class="fa-solid fa-up-long"></i> <span id="upvote-count">245</span>
-                </span>
-                <span class="flex items-center gap-1 text-red-400 hover:text-red-300">
-                    <i class="fa-solid fa-down-long"></i> <span id="downvote-count">12</span>
-                </span>
-                <div class="flex items-center gap-1 text-cyan-400">
-                    <i class="fa-regular fa-eye"></i> <span id="view-count">3500</span>
-                </div>
-                <div class="flex items-center gap-1 text-blue-400">
-                    <i class="fa-regular fa-comment-dots"></i> <span id="comment-count">47</span>
-                </div>
-                <span class="flex items-center gap-1 text-yellow-400 hover:text-yellow-300">
-                    <i class="fa-solid fa-share-nodes"></i> <span id="share-count">23</span>
-                </span>
-                <span class="flex items-center gap-1 text-purple-400 hover:text-purple-300">
-                    <i class="fa-regular fa-bookmark"></i> <span id="bookmark-count">19</span>
-                </span>
+    <div class="flex flex-col md:flex-row gap-4 sm:gap-6 px-4 sm:px-6 my-8">
+        <div id="post-container" class="w-full md:w-[40%] flex flex-col break-words bg-slate-950 rounded-xl border"></div>
+        <div class="w-full md:w-[59%] bg-gray-800 p-3 sm:p-4 rounded-xl relative flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="overflow-y-auto pr-2 space-y-6 pb-32 max-h-full break-words">
+                <p class="text-gray-400 text-sm">No comments yet.</p>
             </div>
         </div>
-        <div class="w-full md:w-3/5 bg-gray-800 p-4 rounded-xl relative flex flex-col max-h-[90vh] overflow-hidden">
-            <div class="overflow-y-auto pr-2 space-y-6 pb-32">
-        
-                <!-- Comment 1 with replies -->
-                <div class="pb-4 border-b border-gray-700">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm">
-                            <span class="text-blue-400 font-semibold">@devGuru</span>
-                            <div class="text-xs text-gray-400">45 mins ago</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-blue-400 hover:text-blue-300" title="Follow">
-                                <i class="fa-solid fa-user-plus"></i>
-                            </span>
-                            <span class="text-red-500 hover:text-red-400" title="Report">
-                                <i class="fa-solid fa-flag"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-200 mb-3 leading-relaxed">
-                        Really helped me structure my layout better. Keep posting stuff like this!
-                    </p>
-                    <div class="flex items-center gap-4 text-xs text-gray-400">
-                        <span class="flex items-center gap-1 text-green-400 hover:text-green-300">
-                            <i class="fa-solid fa-up-long"></i> <span>21</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-red-400 hover:text-red-300">
-                            <i class="fa-solid fa-down-long"></i> <span>1</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-blue-400 hover:text-blue-300">
-                            <i class="fa-solid fa-comment"></i> <span>Reply</span>
-                        </span>
-                    </div>
-        
-                    <!-- Replies -->
-                    <div class="mt-4 ml-6 space-y-4">
-                        <div class="bg-gray-700 p-3 rounded-lg">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-blue-300 text-sm font-semibold">@uiMaster</span>
-                                <span class="text-xs text-gray-400">30 mins ago</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Agreed! This layout guide really made things easier.</p>
-                        </div>
-                        <div class="bg-gray-700 p-3 rounded-lg">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-blue-300 text-sm font-semibold">@cssNinja</span>
-                                <span class="text-xs text-gray-400">20 mins ago</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Same here. The spacing tips were top-notch!</p>
-                        </div>
-                    </div>
-                </div>
-        
-                <!-- Comment 2 with replies -->
-                <div class="pb-4 border-b border-gray-700">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm">
-                            <span class="text-blue-400 font-semibold">@codeWizard</span>
-                            <div class="text-xs text-gray-400">1 hour ago</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-blue-400 hover:text-blue-300" title="Follow">
-                                <i class="fa-solid fa-user-plus"></i>
-                            </span>
-                            <span class="text-red-500 hover:text-red-400" title="Report">
-                                <i class="fa-solid fa-flag"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-200 mb-3 leading-relaxed">
-                        Awesome write-up! Your explanation about flex and grid was so clear.
-                    </p>
-                    <div class="flex items-center gap-4 text-xs text-gray-400">
-                        <span class="flex items-center gap-1 text-green-400 hover:text-green-300">
-                            <i class="fa-solid fa-up-long"></i> <span>10</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-red-400 hover:text-red-300">
-                            <i class="fa-solid fa-down-long"></i> <span>0</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-blue-400 hover:text-blue-300">
-                            <i class="fa-solid fa-comment"></i> <span>Reply</span>
-                        </span>
-                    </div>
-        
-                    <!-- Replies -->
-                    <div class="mt-4 ml-6 space-y-4">
-                        <div class="bg-gray-700 p-3 rounded-lg">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-blue-300 text-sm font-semibold">@gridGuru</span>
-                                <span class="text-xs text-gray-400">45 mins ago</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Yes! That section helped me organize my layout perfectly.</p>
-                        </div>
-                        <div class="bg-gray-700 p-3 rounded-lg">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-blue-300 text-sm font-semibold">@frontendFan</span>
-                                <span class="text-xs text-gray-400">35 mins ago</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Flexbox finally makes sense after this!</p>
-                        </div>
-                    </div>
-                </div>
-        
-                <!-- Comment 3 (no replies) -->
-                <div class="pb-4 border-b border-gray-700">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm">
-                            <span class="text-blue-400 font-semibold">@newbieCoder</span>
-                            <div class="text-xs text-gray-400">2 hours ago</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-blue-400 hover:text-blue-300" title="Follow">
-                                <i class="fa-solid fa-user-plus"></i>
-                            </span>
-                            <span class="text-red-500 hover:text-red-400" title="Report">
-                                <i class="fa-solid fa-flag"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-200 mb-3 leading-relaxed">
-                        I'm just starting out and this was really helpful. Thanks a lot!
-                    </p>
-                    <div class="flex items-center gap-4 text-xs text-gray-400">
-                        <span class="flex items-center gap-1 text-green-400 hover:text-green-300">
-                            <i class="fa-solid fa-up-long"></i> <span>5</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-red-400 hover:text-red-300">
-                            <i class="fa-solid fa-down-long"></i> <span>0</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-blue-400 hover:text-blue-300">
-                            <i class="fa-solid fa-comment"></i> <span>Reply</span>
-                        </span>
-                    </div>
-                </div>
-        
-            </div>
-        </div>  
     </div>
-    <div class="fixed bottom-0 left-0 w-full bg-gray-900 p-3 border-t border-gray-700 z-50">
-        <div class="max-w-screen-xl mx-auto flex items-center gap-3">
-            <textarea placeholder="Write a comment..."
-                class="h-10 flex-grow p-2 rounded-md bg-gray-700 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    <div class="fixed bottom-4 right-[5%] w-[90%] sm:w-[80%] sm:right-[10%] md:bottom-4 md:right-12 md:w-[50%] bg-gray-950 p-3 border rounded-lg z-50">
+        <div class="w-full flex items-center gap-3">
+            <textarea placeholder="Write a comment..." id="new-comment"
+                class="h-10 flex-grow p-2 rounded-md bg-slate-900 border text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             <div
-                class="bg-blue-600 hover:bg-blue-700 text-sm w-10 h-10 rounded-lg flex justify-center items-center cursor-pointer">
+                class="bg-blue-600 hover:bg-blue-700 border text-sm w-10 h-10 rounded-lg flex justify-center items-center cursor-pointer">
                 <i class="fa-solid fa-plus"></i>
             </div>
         </div>
-    </div>
+    </div>    
+    <script src="../js/post.js"></script>
     <script src="../js/utils.js"></script>
 </body>
 

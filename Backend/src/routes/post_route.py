@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from db.connection import get_db
 from controllers.post_controller import (
     create_post, get_post_by_id,
-    pin_post, lock_post, edit_post, get_posts,delete_post
+    pin_post, lock_post, edit_post, get_posts,delete_post, count_view
 )
 from controllers.post_controller import PostRequest
 from pydantic import BaseModel
@@ -94,3 +94,12 @@ async def edit_post_api(
         tags=tags if tags else None,
     )
     return await edit_post(request, postImage, db)
+
+@post_router.post("/countView")
+async def count_view_api(
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    post_id = payload.get("post_id")
+    user_id = payload.get("user_id")
+    return await count_view(post_id, user_id, db)

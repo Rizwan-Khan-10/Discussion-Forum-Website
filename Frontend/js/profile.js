@@ -168,6 +168,7 @@ async function getProfile() {
             document.getElementById("posts-count").innerText = data.data.total_posts;
             document.getElementById("upvotes-count").innerText = data.data.total_upvotes;
             document.getElementById("downvotes-count").innerText = data.data.total_downvotes;
+            document.getElementById("view-count").innerText = data.data.total_views;
             if (data.data.img) {
                 document.getElementById("profileImg").src = data.data.img;
             } else {

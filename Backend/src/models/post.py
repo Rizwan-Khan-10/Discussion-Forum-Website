@@ -16,7 +16,7 @@ class Post(Base):
     upvotes = Column(String, default="0")
     downvotes = Column(String, default="0")
     comment_count = Column(String, default="0") 
-    bookmark = Column(String, default="0")
+    bookmark_count = Column(String, default="0")
     shared = Column(String, default="0")
     report = Column(String, default="0")
     followed = Column(String, default="0")
@@ -29,6 +29,7 @@ class Post(Base):
     user = relationship("User", back_populates="posts")
     category = relationship("Category", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
-    saved_threads = relationship("SavedThread", back_populates="post")
+    bookmark = relationship("Bookmark", back_populates="post")  
+    followThread = relationship("FollowThread", back_populates="post") 
 
 __all__ = ["Post"]
