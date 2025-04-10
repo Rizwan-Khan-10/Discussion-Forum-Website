@@ -16,6 +16,7 @@ from models.vote import Base as VoteBase
 from models.post import Base as PostBase
 from models.commentVote import Base as CommentVoteBase
 from models.reply import Base as ReplyBase
+from models.voteReply import Base as ReplyVoteBase
 from models.report import Base as ReportBase
 from models.bookmark import Base as BookmarkBase   
 from models.followThread import Base as FollowThreadBase   
@@ -27,6 +28,8 @@ from routes.bookmark_route import bookmark_router
 from routes.followedThread_route import followThread_router
 from routes.comment_route import comment_router
 from routes.commentVote_route import commentVote_router
+from routes.reply_route import reply_router
+from routes.replyVote_route import replyVote_router
 
 app = FastAPI()
 
@@ -46,6 +49,8 @@ BookmarkBase.metadata.create_all(bind=engine)
 FollowThreadBase.metadata.create_all(bind=engine)    
 CommentBase.metadata.create_all(bind=engine)    
 CommentVoteBase.metadata.create_all(bind=engine)    
+ReplyBase.metadata.create_all(bind=engine)    
+ReplyVoteBase.metadata.create_all(bind=engine)    
 
 app.include_router(login_router, prefix="/user", tags=["User"])
 app.include_router(profile_router, prefix="/profile", tags=["UserProfile"])
@@ -55,6 +60,8 @@ app.include_router(bookmark_router, prefix="/bookmark", tags=["Bookmark"])
 app.include_router(followThread_router, prefix="/thread", tags=["FollowThread"])
 app.include_router(comment_router, prefix="/comment", tags=["Comment"])
 app.include_router(commentVote_router, prefix="/voteComment", tags=["CommentVote"])
+app.include_router(reply_router, prefix="/reply", tags=["Reply"])
+app.include_router(replyVote_router, prefix="/voteReply", tags=["ReplyVote"])
 
 @app.get("/")
 def home():

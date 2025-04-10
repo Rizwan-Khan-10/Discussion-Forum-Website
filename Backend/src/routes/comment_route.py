@@ -19,11 +19,6 @@ class EditCommentRequest(BaseModel):
     comment_id: str
     new_content: str
 
-class VoteRequest(BaseModel):
-    comment_id: str
-    user_id: str
-    vote_type: str 
-
 class GetCommentRequest(BaseModel):
     post_id: str 
 

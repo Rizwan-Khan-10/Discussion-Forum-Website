@@ -537,7 +537,8 @@ function renderComments(comments) {
             <div class="reply-container hidden mt-4 pl-4 border-l border-gray-600 space-y-4" id="reply-container-${comment.comment_id}">
             </div>
         `;
-        getCommentVote(comment.comment_id) ;
+        getCommentVote(comment.comment_id);
+        getReplies(comment.comment_id);
         container.appendChild(div);
     });
 }
@@ -584,15 +585,35 @@ document.addEventListener("click", function (e) {
         return;
     }
 
+    if (e.target.closest(".edit-reply-btn")) {
+        const replyId = e.target.closest(".edit-reply-btn").id;
+        const commentId = e.target.closest(".edit-reply-btn").dataset.id;
+        handleEditReply(replyId, commentId);
+        document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
+        return;
+    }
+
     if (e.target.closest(".upvote")) {
         const commentId = e.target.closest(".upvote").dataset.id;
-        addVoteToComment(commentId,"upvote");
+        addVoteToComment(commentId, "upvote");
         return;
     }
 
     if (e.target.closest(".downvote")) {
         const commentId = e.target.closest(".downvote").dataset.id;
-        addVoteToComment(commentId,"downvote");
+        addVoteToComment(commentId, "downvote");
+        return;
+    }
+
+    if (e.target.closest(".upvote-reply")) {
+        const replyId = e.target.closest(".upvote-reply").dataset.id;
+        addVoteToReply(replyId, "upvote");
+        return;
+    }
+
+    if (e.target.closest(".downvote-reply")) {
+        const replyId = e.target.closest(".downvote-reply").dataset.id;
+        addVoteToReply(replyId, "downvote");
         return;
     }
 
@@ -606,126 +627,48 @@ document.addEventListener("click", function (e) {
         return;
     }
 
+    if (e.target.closest(".delete-reply-btn")) {
+        const commentId = e.target.closest(".delete-reply-btn").dataset.id;
+        const replyId = e.target.closest(".delete-reply-btn").id;
+        const confirmDelete = confirm("Are you sure you want to delete this reply?");
+        if (confirmDelete) {
+            deleteReply(commentId, replyId);
+        }
+        document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
+        return;
+    }
+
     document.querySelectorAll(".options-menu").forEach(menu => menu.classList.add("hidden"));
 
     if (e.target.closest(".reply-toggle")) {
         const id = e.target.closest(".reply-toggle").dataset.id;
         const replyContainer = document.getElementById(`reply-container-${id}`);
         replyContainer.classList.toggle("hidden");
-
-        if (!replyContainer.dataset.loaded) {
-            const comment = allComments.find(c => c.id == id);
-            if (comment && comment.replies.length > 0) {
-                comment.replies.forEach(reply => addReply(replyContainer, reply));
-            }
-            addReplyInput(replyContainer, id);
-            replyContainer.dataset.loaded = true;
-        }
+        addReplyInput(replyContainer, id);
     }
 });
 
-function addReply(container, reply) {
-    const div = document.createElement("div");
-    div.className = "flex gap-3";
-
-    div.innerHTML = `
-        <img src="${reply.profile}" alt="profile" class="w-8 h-8 rounded-full mt-1">
-        <div class="flex-1">
-            <div class="flex justify-between">
-                <div>
-                    <p class="text-sm text-white font-semibold">${reply.name}</p>
-                    <p class="text-xs text-gray-400 mb-1">${reply.time}</p>
-                </div>
-                <div class="relative">
-                    <button class="text-gray-300 hover:text-white options-btn text-lg">⋮</button>
-                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-28 text-sm">
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-pen text-xs"></i> Edit
-                        </button>
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-trash text-xs"></i> Delete
-                        </button>
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-flag text-xs"></i> Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <p class="text-sm text-gray-200 mb-2">${reply.content}</p>
-            <div class="flex items-center space-x-4 text-gray-400 text-sm">
-                <button><i class="far fa-thumbs-up"></i></button>
-                <button><i class="far fa-thumbs-down"></i></button>
-            </div>
-        </div>
-    `;
-    container.appendChild(div);
-}
-
 function addReplyInput(container, commentId) {
+    if (container.querySelector(".reply-box")) return;
     const replyBox = document.createElement("div");
     replyBox.className = "reply-box mt-3 flex items-start gap-2";
     replyBox.innerHTML = `
-        <textarea class="flex-1 p-2 rounded bg-gray-800 text-white text-sm" rows="1" placeholder="Write a reply..." id="reply-text-${commentId}"></textarea>
-        <button class="text-blue-400 hover:text-blue-600 mt-1" onclick="submitReply(${commentId})">
+        <textarea id="new-reply" class="reply-text flex-1 p-2 rounded bg-gray-800 text-white text-sm" rows="1" placeholder="Write a reply..."></textarea>
+        <button class="add-reply-btn text-blue-400 hover:text-blue-600 mt-1">
             <i class="fas fa-paper-plane text-lg"></i>
         </button>
     `;
+
     container.appendChild(replyBox);
-}
 
-function submitReply(commentId) {
-    const textArea = document.getElementById(`reply-text-${commentId}`);
-    const value = textArea.value.trim();
-    if (!value) return;
+    const replyTextarea = replyBox.querySelector(".reply-text");
+    const addReplyBtn = replyBox.querySelector(".add-reply-btn");
 
-    const newReply = {
-        name: "You",
-        time: "Just now",
-        content: value,
-        profile: "https://i.pravatar.cc/40?img=4"
-    };
-
-    const container = document.getElementById(`reply-container-${commentId}`);
-    const replyBox = container.querySelector(".reply-box");
-    container.insertBefore(buildReplyElement(newReply), replyBox);
-    textArea.value = "";
-}
-
-function buildReplyElement(reply) {
-    const div = document.createElement("div");
-    div.className = "flex gap-3";
-
-    div.innerHTML = `
-        <img src="${reply.profile}||../assets/profile.png" alt="profile" class="w-8 h-8 rounded-full mt-1">
-        <div class="flex-1">
-            <div class="flex justify-between">
-                <div>
-                    <p class="text-sm text-white font-semibold">${reply.name}</p>
-                    <p class="text-xs text-gray-400 mb-1">${reply.time}</p>
-                </div>
-                <div class="relative">
-                    <button class="text-gray-300 hover:text-white options-btn text-lg">⋮</button>
-                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-28 text-sm">
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-pen text-xs"></i> Edit
-                        </button>
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-trash text-xs"></i> Delete
-                        </button>
-                        <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
-                            <i class="fas fa-flag text-xs"></i> Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <p class="text-sm text-gray-200 mb-2">${reply.content}</p>
-            <div class="flex items-center space-x-4 text-gray-400 text-sm">
-                <button><i class="far fa-thumbs-up"></i></button>
-                <button><i class="far fa-thumbs-down"></i></button>
-            </div>
-        </div>
-    `;
-    return div;
+    addReplyBtn.addEventListener("click", function () {
+        const reply = replyTextarea.value;
+        postReply(commentId, reply);
+        replyTextarea.value = "";
+    });
 }
 
 document.getElementById("postComment").addEventListener("click", postComment);
@@ -852,6 +795,11 @@ function handleEditComment(commentId) {
             return;
         }
 
+        if (newContent === originalContent) {
+            alert("No changes made to the comment.");
+            return;
+        }
+
         confirmBtn.classList.add("opacity-50", "pointer-events-none");
 
         contentEl.innerHTML = newContent;
@@ -876,33 +824,38 @@ function editComment(commentId, newContent) {
             new_content: newContent
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            const commentDiv = document.querySelector(`[data-id="${commentId}"]`);
-            const contentEl = commentDiv.querySelector(".comment-content");
-            const timeEl = commentDiv.querySelector(".comment-time");
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                const commentDiv = document.querySelector(`[data-id="${commentId}"]`);
+                const contentEl = commentDiv.querySelector(".comment-content");
+                const timeEl = commentDiv.querySelector(".comment-time");
 
-            contentEl.innerHTML = data.data.content;
+                contentEl.innerHTML = data.data.content;
 
-            if (timeEl) {
-                const time = data.data.time;
-                const formatted = formatTimeAgo(time);
-                timeEl.innerText = formatted + " (edited)";
+                if (timeEl) {
+                    let isEdited = false;
+                    let rawTime = data.data.time;
+                    if (rawTime.endsWith(" (edited)")) {
+                        isEdited = true;
+                        rawTime = rawTime.replace(" (edited)", "");
+                    }
+                    const timeAgo = formatTimeAgo(rawTime) + (isEdited ? " (edited)" : "");
+                    timeEl.innerText = timeAgo;
+                }
+            } else {
+                alert(data.message || "Failed to edit comment.");
             }
-        } else {
-            alert(data.message || "Failed to edit comment.");
-        }
-    })
-    .catch(err => {
-        console.error("Edit error:", err);
-        alert("Something went wrong.");
-    });
+        })
+        .catch(err => {
+            console.error("Edit error:", err);
+            alert("Something went wrong.");
+        });
 }
 
 async function addVoteToComment(commentID, voteType) {
     try {
-        const response = await fetch("http://localhost:8000/voteComment/addVote", {
+        const response = await fetch("http://localhost:8000/voteComment/addCommentVote", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -973,7 +926,7 @@ async function addVoteToComment(commentID, voteType) {
 
 async function getCommentVote(commentId) {
     try {
-        const response = await fetch("http://localhost:8000/voteComment/getVote", {
+        const response = await fetch("http://localhost:8000/voteComment/getCommentVote", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -995,6 +948,372 @@ async function getCommentVote(commentId) {
         const downvoteIcon = document.querySelector(`.downvote[data-id='${commentId}']`);
         const upvoteCountEl = upvoteIcon.nextSibling;
         const downvoteCountEl = downvoteIcon.nextSibling;
+
+        if (responseData.data.vote_type === "upvote") {
+            upvoteIcon.classList.replace("fa-regular", "fa-solid");
+            downvoteIcon.classList.replace("fa-solid", "fa-regular");
+        } else if (responseData.data.vote_type === "downvote") {
+            downvoteIcon.classList.replace("fa-regular", "fa-solid");
+            upvoteIcon.classList.replace("fa-solid", "fa-regular");
+        }
+
+        if (responseData.data) {
+            upvoteCountEl.textContent = ` ${formatCount(responseData.data.upvotes)}`;
+            downvoteCountEl.textContent = ` ${formatCount(responseData.data.downvotes)}`;
+        }
+
+    } catch (error) {
+        console.error("Error getting vote:", error);
+    }
+}
+
+let allreplies = [];
+
+function renderReplies(replies, commentId) {
+    const container = document.getElementById(`reply-container-${commentId}`);
+    const currentUserId = sessionStorage.getItem("userId");
+
+    replies.forEach(reply => {
+        allreplies.push(reply);
+        const div = document.createElement("div");
+        div.className = "bg-gray-900 rounded-lg p-3 relative";
+        div.setAttribute("data-id", reply.reply_id);
+
+        const isOwner = currentUserId === reply.user_id;
+        const displayName = isOwner ? "You" : reply.username;
+
+        let isEdited = false;
+        let rawTime = reply.time;
+        if (rawTime.endsWith(" (edited)")) {
+            isEdited = true;
+            rawTime = rawTime.replace(" (edited)", "");
+        }
+        const timeAgo = formatTimeAgo(rawTime) + (isEdited ? " (edited)" : "");
+
+        let optionsMenu = '';
+        if (isOwner) {
+            optionsMenu = `
+                <button class="edit-reply-btn flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left" id="${reply.reply_id}" data-id="${commentId}">
+                    <i class="text-blue-400 fas fa-pen text-xs"></i> Edit
+                </button>
+                <button class="delete-reply-btn flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left" id="${reply.reply_id}" data-id="${commentId}">
+                    <i class="text-red-400 fas fa-trash text-xs"></i> Delete
+                </button>
+            `;
+        } else {
+            optionsMenu = `
+                <button class="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 w-full text-left">
+                    <i class="text-red-400 fas fa-flag text-xs"></i> Report
+                </button>
+            `;
+        }
+
+        div.innerHTML = `
+            <div class="flex justify-between">
+                <div class="flex">
+                    <img src="${reply.img}" onerror="this.onerror=null;this.src='../assets/profile.png';" alt="profile" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <p class="text-white font-semibold text-sm">${displayName}</p>
+                        <p class="reply-time text-gray-400 text-xs">${timeAgo}</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <button class="text-gray-300 hover:text-white options-btn text-xl" data-id="${reply.reply_id}">⋮</button>
+                    <div class="absolute top-6 right-0 bg-gray-800 text-white rounded shadow hidden options-menu z-10 w-32 text-sm">
+                        ${optionsMenu}
+                    </div>
+                </div>
+            </div>
+            <div class="reply-content mt-2 text-gray-200 text-sm">${reply.content}</div>
+            <div class="mt-3 flex items-center space-x-4 text-gray-400 text-sm">
+                <button><i class="text-green-400 fa-regular fa-thumbs-up upvote-reply" data-id="${reply.reply_id}"></i><span class="ml-1 upvote-reply-count">${reply.upvotes || 0}</span></button>
+                <button><i class="text-red-400 fa-regular fa-thumbs-down downvote-reply" data-id="${reply.reply_id}"></i><span class="ml-1 downvote-reply-count">${reply.downvote || 0}</span></button>
+            </div>
+            <div class="reply-container hidden mt-4 pl-4 border-l border-gray-600 space-y-4" id="reply-container-${reply.reply_id}">
+            </div>
+        `;
+        getReplyVote(reply.reply_id);
+        container.prepend(div);
+    });
+}
+
+async function postReply(commentId, value) {
+    const reply = value.trim();
+
+    if (!reply) {
+        alert("Reply can't be empty.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:8000/reply/addReply", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: reply, user_id: sessionStorage.getItem("userId"), comment_id: commentId })
+        });
+
+        const result = await response.json();
+
+        if (result) {
+            renderReplies([result.data], result.data.comment_id);
+        } else {
+            console.error("Failed to post comment:", result.message);
+            alert("Failed to post comment.");
+        }
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        alert("Something went wrong. Please try again.");
+    }
+}
+
+async function getReplies(commentId) {
+    try {
+        const response = await fetch("http://localhost:8000/reply/getReplies", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ comment_id: commentId })
+        });
+
+        const result = await response.json();
+
+        if (result && Array.isArray(result.data) && result.data.length > 0) {
+            let length = result.data.length;
+            const button = document.querySelector(`.reply-toggle[data-id="${commentId}"]`);
+            button.innerHTML = `<i class="text-blue-400 fas fa-reply"></i> Reply (${length})`;
+            renderReplies(result.data, commentId);
+        }
+        if (result.detail) {
+            console.error("Failed to post comment:", result.detail);
+            alert("Failed to post comment.");
+        }
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        alert("Something went wrong. Please try again.");
+    }
+}
+
+function handleEditReply(commentId, replyId) {
+    const replyDiv = document.querySelector(`[data-id="${replyId}"]`);
+    if (!replyDiv) {
+        console.error("Comment div not found for id:", replyId);
+        return;
+    }
+
+    const contentEl = replyDiv.querySelector(".reply-content");
+    const originalContent = contentEl.textContent;
+
+    contentEl.setAttribute("data-original", originalContent);
+
+    contentEl.innerHTML = `
+        <textarea id="edit-reply" class="edit-input bg-gray-800 text-white px-2 py-1 rounded w-full resize-none" rows="3">${originalContent}</textarea>
+        <div class="mt-2 space-x-2 text-lg text-right">
+            <i class="confirm-edit fa-solid fa-check cursor-pointer text-green-500 hover:text-green-300"></i>
+            <i class="cancel-edit fa-solid fa-times cursor-pointer text-red-500 hover:text-red-300"></i>
+        </div>
+    `;
+
+    const input = contentEl.querySelector(".edit-input");
+    const confirmBtn = contentEl.querySelector(".confirm-edit");
+    const cancelBtn = contentEl.querySelector(".cancel-edit");
+
+    confirmBtn.addEventListener("click", () => {
+        const newContent = input.value.trim();
+        if (!newContent) {
+            alert("Reply cannot be empty.");
+            return;
+        }
+        if (newContent === originalContent) {
+            alert("No changes made to the reply.");
+            return;
+        }
+        confirmBtn.classList.add("opacity-50", "pointer-events-none");
+
+        contentEl.innerHTML = newContent;
+        editReply(replyId, newContent, commentId);
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        contentEl.textContent = contentEl.getAttribute("data-original");
+    });
+}
+
+function editReply(commentId, newContent, replyId) {
+    fetch("http://127.0.0.1:8000/reply/editReply", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            reply_id: replyId,
+            user_id: sessionStorage.getItem("userId"),
+            comment_id: commentId,
+            new_content: newContent
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                const commentDiv = document.querySelector(`[data-id="${replyId}"]`);
+                const contentEl = commentDiv.querySelector(".reply-content");
+                const timeEl = commentDiv.querySelector(".reply-time");
+
+                contentEl.innerHTML = data.data.content;
+
+                if (timeEl) {
+                    let isEdited = false;
+                    let rawTime = data.data.time;
+                    if (rawTime.endsWith(" (edited)")) {
+                        isEdited = true;
+                        rawTime = rawTime.replace(" (edited)", "");
+                    }
+                    const timeAgo = formatTimeAgo(rawTime) + (isEdited ? " (edited)" : "");
+                    timeEl.innerText = timeAgo;
+                }
+            } else {
+                alert(data.message || "Failed to edit comment.");
+            }
+        })
+        .catch(err => {
+            console.error("Edit error:", err);
+            alert("Something went wrong.");
+        });
+}
+
+async function deleteReply(comment_id, reply_id) {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/reply/deleteReply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ comment_id, reply_id })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to delete comment');
+        }
+        if (data.data) {
+            document.querySelector(`[data-id='${data.data.reply_id}']`).remove();
+            const button = document.querySelector(`.reply-toggle[data-id="${comment_id}"]`);
+            if (button) {
+                const text = button.innerText.trim();
+                const match = text.match(/\((\d+)\)/);
+                if (match) {
+                    let count = parseInt(match[1]) - 1;
+                    button.innerHTML = `<i class="text-blue-400 fas fa-reply"></i> Reply (${formatCount(count)})`;
+                }
+            }
+
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error.message);
+    }
+}
+
+async function addVoteToReply(replyId, voteType) {
+    try {
+        const response = await fetch("http://localhost:8000/voteReply/addReplyVote", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                reply_id: replyId,
+                user_id: sessionStorage.getItem("userId"),
+                vote_type: voteType,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Failed to add vote");
+        }
+
+        const responseData = await response.json();
+
+        const upvoteIcon = document.querySelector(`.upvote-reply[data-id='${replyId}']`);
+        const downvoteIcon = document.querySelector(`.downvote-reply[data-id='${replyId}']`);
+
+        const upvoteCountEl = upvoteIcon?.nextElementSibling;
+        const downvoteCountEl = downvoteIcon?.nextElementSibling;
+
+
+        let upvoteCount = parseInt(upvoteCountEl?.textContent.trim() || 0);
+        let downvoteCount = parseInt(downvoteCountEl?.textContent.trim() || 0);
+
+        switch (responseData.data.message) {
+            case "Upvote added.":
+                upvoteCount++;
+                upvoteIcon.classList.replace("fa-regular", "fa-solid");
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Downvote added.":
+                downvoteCount++;
+                downvoteIcon.classList.replace("fa-regular", "fa-solid");
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Upvote removed.":
+                upvoteCount--;
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Downvote removed.":
+                downvoteCount--;
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                break;
+            case "Vote updated from upvote to downvote.":
+                upvoteCount--;
+                downvoteCount++;
+                upvoteIcon.classList.replace("fa-solid", "fa-regular");
+                downvoteIcon.classList.replace("fa-regular", "fa-solid");
+                break;
+            case "Vote updated from downvote to upvote.":
+                downvoteCount--;
+                upvoteCount++;
+                downvoteIcon.classList.replace("fa-solid", "fa-regular");
+                upvoteIcon.classList.replace("fa-regular", "fa-solid");
+                break;
+        }
+
+        if (upvoteCountEl) upvoteCountEl.textContent = `${formatCount(upvoteCount)}`;
+        if (downvoteCountEl) downvoteCountEl.textContent = `${formatCount(downvoteCount)}`;
+
+    } catch (error) {
+        console.error("Error adding vote:", error);
+    }
+}
+
+async function getReplyVote(replyId) {
+    try {
+        const response = await fetch("http://localhost:8000/voteReply/getReplyVote", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                reply_id: replyId,
+                user_id: sessionStorage.getItem("userId"),
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Failed to get vote");
+        }
+
+        const responseData = await response.json();
+
+        const upvoteIcon = document.querySelector(`.upvote-reply[data-id='${replyId}']`);
+        const downvoteIcon = document.querySelector(`.downvote-reply[data-id='${replyId}']`);
+
+        const upvoteCountEl = upvoteIcon?.nextElementSibling;
+        const downvoteCountEl = downvoteIcon?.nextElementSibling;
+
 
         if (responseData.data.vote_type === "upvote") {
             upvoteIcon.classList.replace("fa-regular", "fa-solid");

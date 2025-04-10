@@ -1,128 +1,160 @@
 from sqlalchemy.orm import Session
-from models.reply import reply
+from models.reply import Reply
+from models.user import User
+from models.userProfile import UserProfile
+from models.comment import Comment 
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
 from middlewares.encryption import EncryptionMiddleware
 from middlewares.decryption import DecryptionMiddleware
-from pydantic import BaseModel
-from datetime import datetime
+import uuid
+import datetime
 
-class replyRequest(BaseModel):
-    post_id: str
-    category_id: str
-    user_id: str
-    content: str
-
-class VoteRequest(BaseModel):
-    post_id: str
-    category_id: str
-    user_id: str
-    vote_type: str 
-
-async def add_reply(request: replyRequest, db: Session):
+async def add_reply(request, db: Session):
     try:
-        encrypted_content = EncryptionMiddleware.encrypt({"content": request.content})["content"]
+        comment = db.query(Comment).filter_by(comment_id=request.comment_id).first()
+        if not comment:
+            raise APIError(status_code=404, detail="Comment not found.")
 
-        new_reply = reply(
-            post_id=request.post_id,
-            category_id=request.category_id,
+        user = db.query(User).filter_by(user_id=request.user_id).first()
+        if not user:
+            raise APIError(status_code=404, detail="User not found.")
+
+        reply_id = str(uuid.uuid4())
+        encrypted_content = EncryptionMiddleware.encrypt({"content": request.content})["content"]
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+
+        new_reply = Reply(
+            reply_id=reply_id,
+            comment_id=request.comment_id,
             user_id=request.user_id,
             content=encrypted_content,
-            upvotes=0,
-            downvotes=0,
-            replies=0,
-            is_pinned=False,
-            created_at=datetime.utcnow().isoformat()
+            created_at=current_time
         )
+
         db.add(new_reply)
         db.commit()
-        db.refresh(new_reply)
 
-        return APIResponse.success(data=new_reply, message="reply added successfully.")
+        user_profile = db.query(UserProfile).filter_by(user_id=request.user_id).first()
+
+        decrypted_username = DecryptionMiddleware.decrypt({"username": user.username}).get("username", user.username)
+        decrypted_img = None
+        if user_profile and user_profile.img:
+            decrypted_img = DecryptionMiddleware.decrypt({"img": user_profile.img}).get("img", user_profile.img)
+
+        response = {
+            "comment_id": request.comment_id,
+            "reply_id": reply_id,
+            "user_id": request.user_id,
+            "username": decrypted_username,
+            "img": decrypted_img,
+            "content": request.content,
+            "time": current_time.isoformat()
+        }
+
+        return APIResponse.success(message="Reply added successfully", data=response)
+
+    except APIError as api_err:
+        raise api_err
 
     except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        print("Error adding reply:", str(e))
+        raise APIError(status_code=500, detail="An unexpected error occurred while adding reply.")
 
-async def get_replys(post_id: str, category_id: str, db: Session):
+async def get_replies(comment_id: str, db: Session):
     try:
-        replys = db.query(reply).filter(reply.post_id == post_id, reply.category_id == category_id).all()
-        if not replys:
-            raise APIError(status_code=404, detail="No replys found.")
+        comment = db.query(Comment).filter_by(comment_id=comment_id).first()
+        if not comment:
+            raise APIError(status_code=404, detail="Comment not found.")
 
-        decrypted_replys = []
-        for reply in replys:
-            decrypted_content = DecryptionMiddleware.decrypt({"content": reply.content})["content"]
-            decrypted_replys.append({
-                "post_id": reply.post_id,
-                "category_id": reply.category_id,
+        replies = db.query(Reply).filter_by(comment_id=comment_id).order_by(Reply.created_at.asc()).all()
+
+        response_data = []
+
+        for reply in replies:
+            user = db.query(User).filter_by(user_id=reply.user_id).first()
+            user_profile = db.query(UserProfile).filter_by(user_id=reply.user_id).first()
+
+            decrypted_username = DecryptionMiddleware.decrypt({"username": user.username}).get("username", user.username)
+            decrypted_img = None
+            if user_profile and user_profile.img:
+                decrypted_img = DecryptionMiddleware.decrypt({"img": user_profile.img}).get("img", user_profile.img)
+
+            decrypted_content = DecryptionMiddleware.decrypt({"content": reply.content}).get("content", reply.content)
+
+            response_data.append({
+                "comment_id": comment_id,
+                "reply_id": reply.reply_id,
                 "user_id": reply.user_id,
+                "username": decrypted_username,
+                "img": decrypted_img,
                 "content": decrypted_content,
-                "upvotes": reply.upvotes,
-                "downvotes": reply.downvotes,
-                "replies": reply.replies,
-                "is_pinned": reply.is_pinned,
-                "created_at": reply.created_at
+                "time": reply.created_at
             })
 
-        return APIResponse.success(data=decrypted_replys, message="replys retrieved successfully.")
+        return APIResponse.success(message="Replies fetched successfully", data=response_data)
 
-    except APIError as e:
-        raise e
-    except Exception as e:
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
-async def edit_reply(post_id: str, category_id: str, content: str, db: Session):
-    try:
-        reply = db.query(reply).filter(reply.post_id == post_id, reply.category_id == category_id).first()
-        if not reply:
-            raise APIError(status_code=404, detail="reply not found.")
-
-        encrypted_content = EncryptionMiddleware.encrypt({"content": content})["content"]
-        reply.content = encrypted_content
-
-        db.commit()
-        db.refresh(reply)
-
-        return APIResponse.success(data=reply, message="reply edited successfully.")
+    except APIError as api_err:
+        raise api_err
 
     except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        print("Error fetching replies:", str(e))
+        raise APIError(status_code=500, detail="An unexpected error occurred while fetching replies.")
 
-async def delete_reply(post_id: str, category_id: str, db: Session):
+async def delete_reply(comment_id: str, reply_id: str, db: Session):
     try:
-        reply = db.query(reply).filter(reply.post_id == post_id, reply.category_id == category_id).first()
+        comment = db.query(Comment).filter_by(comment_id=comment_id).first()
+        if not comment:
+            raise APIError(status_code=404, detail="Comment not found.")
+
+        reply = db.query(Reply).filter_by(reply_id=reply_id, comment_id=comment_id).first()
         if not reply:
-            raise APIError(status_code=404, detail="reply not found.")
+            raise APIError(status_code=404, detail="Reply not found.")
 
         db.delete(reply)
         db.commit()
 
-        return APIResponse.success(message="reply deleted successfully.")
+        return APIResponse.success(message="Reply deleted successfully", data={"reply_id": reply_id})
+
+    except APIError as api_err:
+        raise APIError(status_code=api_err.status_code, detail=api_err.detail)
 
     except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        print("Error deleting reply:", str(e))
+        raise APIError(status_code=500, detail="An unexpected error occurred while deleting reply.")
 
-async def vote_reply(request: VoteRequest, db: Session):
+async def edit_reply(user_id: str, comment_id: str, reply_id: str, new_content: str, db: Session):
     try:
-        reply = db.query(reply).filter(reply.post_id == request.post_id, reply.category_id == request.category_id).first()
-        if not reply:
-            raise APIError(status_code=404, detail="reply not found.")
+        comment = db.query(Comment).filter_by(comment_id=comment_id).first()
+        if not comment:
+            raise APIError(status_code=404, detail="Comment not found.")
 
-        if request.vote_type == "up":
-            reply.upvotes += 1
-        elif request.vote_type == "down":
-            reply.downvotes += 1
-        else:
-            raise APIError(status_code=400, detail="Invalid vote type. Use 'up' or 'down'.")
+        user = db.query(User).filter_by(user_id=user_id).first()
+        if not user:
+            raise APIError(status_code=404, detail="User not found.")
+
+        reply = db.query(Reply).filter_by(reply_id=reply_id, user_id=user_id, comment_id=comment_id).first()
+        if not reply:
+            raise APIError(status_code=404, detail="Reply not found or not authorized.")
+
+        encrypted_content = EncryptionMiddleware.encrypt({"content": new_content})["content"]
+
+        reply.content = encrypted_content
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+        reply.created_at = current_time.isoformat() + " (edited)"
 
         db.commit()
-        db.refresh(reply)
 
-        return APIResponse.success(data=reply, message=f"reply {request.vote_type}voted successfully.")
+        return APIResponse.success(message="Reply updated successfully", data={
+            "reply_id": reply_id,
+            "user_id": user_id,
+            "content": new_content,
+            "time": reply.created_at
+        })
+
+    except APIError as api_err:
+        raise APIError(status_code=api_err.status_code, detail=api_err.detail)
 
     except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        print("Error editing reply:", str(e))
+        raise APIError(status_code=500, detail="An unexpected error occurred while editing reply.")
