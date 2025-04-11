@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from db.connection import get_db
 from controllers.post_controller import (
     create_post, get_post_by_id,
-    pin_post, lock_post, edit_post, fetch_popular_content, delete_post, count_view, get_bookmarked_posts ,get_followThread_posts
+    pin_post, lock_post, edit_post, fetch_popular_content, delete_post, count_view, get_bookmarked_posts ,get_followThread_posts, fetch_latest_posts
 )
 from controllers.post_controller import PostRequest
 from pydantic import BaseModel
@@ -86,6 +86,10 @@ async def get_followedThread_posts_api(request: SavedPostRequest, db: Session = 
 @post_router.get("/Explore")
 async def get_post_in_category_api(db: Session = Depends(get_db)):
     return await fetch_popular_content(db)
+
+@post_router.get("/Home")
+async def get_post_home_api(db: Session = Depends(get_db)):
+    return await fetch_latest_posts(db)
 
 @post_router.post("/editPost")
 async def edit_post_api(

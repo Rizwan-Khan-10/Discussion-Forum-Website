@@ -1,61 +1,77 @@
+import json
 from sqlalchemy.orm import Session
 from models.personalChat import PersonalChat
+from models.user import User
+from models.userProfile import UserProfile
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
-from middlewares.encryption import EncryptionMiddleware
 from middlewares.decryption import DecryptionMiddleware
-from pydantic import BaseModel
-import uuid
 
-class PersonalChatRequest(BaseModel):
-    user_id: str
-    user_list: dict
-    last_message: dict | None = None
-
-async def add_personal_chat(request: PersonalChatRequest, db: Session):
+async def get_personal_chats(current_user_id: str, db: Session):
     try:
-        encrypted_last_message = None
-        if request.last_message:
-            encrypted_last_message = EncryptionMiddleware.encrypt(request.last_message)
-        
-        new_chat = PersonalChat(
-            chat_id=str(uuid.uuid4()),
-            user_id=request.user_id,
-            user_list=request.user_list,
-            last_message=encrypted_last_message
-        )
-        
-        db.add(new_chat)
-        db.commit()
-        db.refresh(new_chat)
+        chats = db.query(PersonalChat).filter(
+            (PersonalChat.user_id == current_user_id) |
+            (PersonalChat.user_list.contains([current_user_id]))
+        ).all()
 
-        return APIResponse.success(data=new_chat, message="Personal chat added successfully.")
-    
-    except Exception as e:
-        db.rollback()
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
-async def get_personal_chats(db: Session):
-    try:
-        chats = db.query(PersonalChat).all()
         if not chats:
             raise APIError(status_code=404, detail="No personal chats found.")
 
-        decrypted_chats = []
-        for chat in chats:
-            decrypted_last_message = None
-            if chat.last_message:
-                decrypted_last_message = DecryptionMiddleware.decrypt(chat.last_message)
-            
-            decrypted_chats.append({
-                "chat_id": chat.chat_id,
-                "user_id": chat.user_id,
-                "user_list": chat.user_list,
-                "last_message": decrypted_last_message
-            })
+        result = []
 
-        return APIResponse.success(data=decrypted_chats, message="Personal chats retrieved successfully.")
-    
+        for chat in chats:
+            if chat.user_id == current_user_id:
+                for other_id in chat.user_list:
+                    if other_id == current_user_id:
+                        continue  # 👈 Skip current user itself
+
+                    user = db.query(User).filter(User.user_id == other_id).first()
+                    profile = db.query(UserProfile).filter(UserProfile.user_id == other_id).first()
+                    if not user or not profile:
+                        continue
+
+                    last_msg = None
+                    if chat.last_message:
+                        try:
+                            encrypted_dict = json.loads(chat.last_message)
+                            decrypted = DecryptionMiddleware.decrypt(encrypted_dict)
+                            last_msg = decrypted.get("message")
+                        except Exception:
+                            last_msg = None
+
+                    result.append({
+                        "user_id": other_id,
+                        "username": DecryptionMiddleware.decrypt({"username": user.username}).get("username"),
+                        "img": DecryptionMiddleware.decrypt({"img": profile.img}).get("img"),
+                        "last_message": last_msg
+                    })
+            else:
+                if chat.user_id == current_user_id:
+                    continue 
+
+                owner = db.query(User).filter(User.user_id == chat.user_id).first()
+                profile = db.query(UserProfile).filter(UserProfile.user_id == chat.user_id).first()
+                if not owner or not profile:
+                    continue
+
+                last_msg = None
+                if chat.last_message:
+                    try:
+                        encrypted_dict = json.loads(chat.last_message)
+                        decrypted = DecryptionMiddleware.decrypt(encrypted_dict)
+                        last_msg = decrypted.get("message")
+                    except Exception:
+                        last_msg = None
+
+                result.append({
+                    "user_id": chat.user_id,
+                    "username": DecryptionMiddleware.decrypt({"username": owner.username}).get("username"),
+                    "img": DecryptionMiddleware.decrypt({"img": profile.img}).get("img"),
+                    "last_message": last_msg
+                })
+
+        return APIResponse.success(data=result, message="Personal chats retrieved successfully.")
+
     except APIError as e:
         raise e
     except Exception as e:

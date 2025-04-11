@@ -755,7 +755,7 @@ def serialize_post_for_frontend(post, db: Session, user_profile=None):
         "title": decrypted.get("title"),
         "content": decrypted.get("content"),
         "category_id": post.category_id,
-        "category_name": post.category.category_name if post.category else None,  # <-- updated here
+        "category_name": post.category.category_name if post.category else None,  
         "tags": decrypted.get("tags"),
         "upvotes": decrypted.get("upvotes"),
         "downvotes": decrypted.get("downvotes"),
@@ -769,3 +769,15 @@ def serialize_post_for_frontend(post, db: Session, user_profile=None):
         "image_url": decrypted.get("image_url"),
         "img": decrypted_profile.get("img"),
     }
+
+async def fetch_latest_posts(db: Session):
+    try:
+        latest_posts = db.query(Post).order_by(desc(Post.created_at)).limit(50).all()
+
+        result = [
+            serialize_post_for_frontend(post, db) for post in latest_posts
+        ]
+
+        return APIResponse.success(data=result, message="Latest posts fetched.")
+    except Exception as e:
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")

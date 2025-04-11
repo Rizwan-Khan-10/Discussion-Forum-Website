@@ -31,6 +31,8 @@ from routes.commentVote_route import commentVote_router
 from routes.reply_route import reply_router
 from routes.replyVote_route import replyVote_router
 from routes.follow_route import follow_router
+from routes.chatMessage_route import chat_router
+from routes.personalChat_route import personalChat_router
 
 app = FastAPI()
 
@@ -53,6 +55,8 @@ CommentVoteBase.metadata.create_all(bind=engine)
 ReplyBase.metadata.create_all(bind=engine)    
 ReplyVoteBase.metadata.create_all(bind=engine)    
 FollowBase.metadata.create_all(bind=engine)    
+ChatMessageBase.metadata.create_all(bind=engine)    
+PersonalChatBase.metadata.create_all(bind=engine)    
 
 app.include_router(login_router, prefix="/user", tags=["User"])
 app.include_router(profile_router, prefix="/profile", tags=["UserProfile"])
@@ -65,6 +69,8 @@ app.include_router(commentVote_router, prefix="/voteComment", tags=["CommentVote
 app.include_router(reply_router, prefix="/reply", tags=["Reply"])
 app.include_router(replyVote_router, prefix="/voteReply", tags=["ReplyVote"])
 app.include_router(follow_router, prefix="/follow", tags=["Follower"])
+app.include_router(chat_router, prefix="/chat", tags=["ChatMessage"])
+app.include_router(personalChat_router, prefix="/lastMessage", tags=["PersonalChat"])
 
 @app.get("/")
 def home():

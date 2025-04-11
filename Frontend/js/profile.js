@@ -137,14 +137,11 @@ form.addEventListener("submit", async (e) => {
         } else {
             alert(result.details || "Update failed.");
         }
-
-        profileModal.classList.remove("flex");
-        profileModal.classList.add("hidden");
-
     } catch (err) {
-        console.error("Error during fetch:", err);
-        alert("Something went wrong: " + err);
+        
     }
+    profileModal.classList.remove("flex");
+    profileModal.classList.add("hidden");
 });
 
 window.addEventListener("DOMContentLoaded", checkImageState);
@@ -700,7 +697,6 @@ document.getElementById("editPostForm").addEventListener("submit", async (e) => 
         }
     }
 
-
     try {
         const res = await fetch("http://localhost:8000/post/editPost", {
             method: "POST",
@@ -725,8 +721,7 @@ document.getElementById("editPostForm").addEventListener("submit", async (e) => 
         }
 
     } catch (err) {
-        console.error("Error during fetch:", err);
-        alert("Something went wrong: " + (err.details || err.message));
+       
     }
     PostID = "";
 });
@@ -903,6 +898,9 @@ async function getIdFromUrlAndClean() {
         const data = await response.json();
         if (data.data !== "") {
             document.getElementById("follow-user").dataset.userId = data.data.user_id;
+            document.getElementById("message-user").dataset.userId = data.data.user_id;
+            document.getElementById("message-user").dataset.username = data.data.username;
+            document.getElementById("message-user").dataset.img = data.data.img;
             document.getElementById("profileUsername").innerText = data.data.username;
             document.getElementById("profileBio").innerText = data.data.bio || defaultBio;
             document.getElementById("followers-count").innerText = formatCount(data.data.followers);
@@ -952,6 +950,15 @@ document.getElementById("follow-user").addEventListener("click", async (event) =
     } else {
         sendUnfollowRequest(user_id, follow_id);
     }
+});
+
+document.getElementById("message-user").addEventListener("click", async (event) => {
+    event.preventDefault();
+    const userId = document.getElementById("message-user").dataset.userId;
+    const username = encodeURIComponent(document.getElementById("message-user").dataset.username);
+    const img = encodeURIComponent(document.getElementById("message-user").dataset.img);
+    const url = `./chat.html?userId=${userId}&username=${username}&img=${img}`;
+    window.location.href = url;
 });
 
 async function sendFollowRequest(userId, followId) {

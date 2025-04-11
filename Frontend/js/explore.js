@@ -1,31 +1,3 @@
-document.getElementById("addPost").addEventListener("click", () => {
-    const modal = document.getElementById("postModal");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-});
-
-document.getElementById("close-post").addEventListener("click", () => {
-    const modal = document.getElementById("postModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-});
-
-document.getElementById("postImage").addEventListener("change", function () {
-    const preview = document.getElementById("imagePreview");
-    const file = this.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            preview.src = e.target.result;
-            preview.classList.remove("hidden");
-        };
-        reader.readAsDataURL(file);
-    } else {
-        preview.classList.add("hidden");
-        preview.src = "";
-    }
-});
-
 function createCategorySection(categoryName, categoryId) {
     const container = document.getElementById("category-container");
 
@@ -136,19 +108,34 @@ async function fetchPopularPosts() {
 
         const result = await response.json();
         const data = result.data;
+        const staticSections = ["MostViewed", "MostLiked", "TopReputationPosts"];
+        staticSections.forEach(section => {
+            if (data[section]) {
+                const readableName = section
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase());
 
-        for (const [categoryId, posts] of Object.entries(data)) {
-            const readableName = categoryId
-                .replace(/([A-Z])/g, ' $1')
-                .replace(/^./, str => str.toUpperCase());
+                createCategorySection(readableName, section);
 
-            createCategorySection(readableName, categoryId);
+                data[section].forEach(post => {
+                    addPostToCategory(section, post);
+                });
+            }
+        });
 
-            posts.forEach(post => {
-                addPostToCategory(categoryId, post);
-            });
-        }
+        Object.entries(data).forEach(([categoryId, posts]) => {
+            if (!staticSections.includes(categoryId)) {
+                const readableName = categoryId
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase());
 
+                createCategorySection(readableName, categoryId);
+
+                posts.forEach(post => {
+                    addPostToCategory(categoryId, post);
+                });
+            }
+        });
     } catch (error) {
         console.error('Error fetching popular posts:', error);
     }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from db.connection import get_db
 from pydantic import BaseModel
@@ -12,20 +12,33 @@ class ChatMessageRequest(BaseModel):
     receiver_id: str
     sender_id: str
     message: str
-    time: str 
+    time: str
 
-@chat_router.get("/messages")
-async def get_messages_route(db: Session = Depends(get_db)):
-    return await get_chat_messages(db)
+class EditMessageRequest(BaseModel):
+    user_id: str
+    message_id: str
+    new_message: str
+
+class DeleteMessageRequest(BaseModel):
+    user_id: str
+    message_id: str
+
+class GetMessagesRequest(BaseModel):
+    sender_id: str
+    receiver_id: str
+
+@chat_router.post("/get")
+async def get_messages_route(request: GetMessagesRequest, db: Session = Depends(get_db)):
+    return await get_chat_messages(request.sender_id, request.receiver_id, db)
 
 @chat_router.post("/add")
 async def add_message_route(request: ChatMessageRequest, db: Session = Depends(get_db)):
     return await add_chat_message(request, db)
 
-@chat_router.put("/edit")
-async def edit_message_route(message_id: str, message: str, db: Session = Depends(get_db)):
-    return await edit_chat_message(message_id, message, db)
+@chat_router.post("/edit")
+async def edit_message_route(request: EditMessageRequest, db: Session = Depends(get_db)):
+    return await edit_chat_message(request.user_id, request.message_id, request.new_message, db)
 
-@chat_router.delete("/delete")
-async def delete_message_route(message_id: str, db: Session = Depends(get_db)):
-    return await delete_chat_message(message_id, db)
+@chat_router.post("/delete")
+async def delete_message_route(request: DeleteMessageRequest, db: Session = Depends(get_db)):
+    return await delete_chat_message(request.user_id, request.message_id, db)
