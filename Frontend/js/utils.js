@@ -19,3 +19,12 @@ document.addEventListener('click', (e) => {
         mobileMenu.classList.add('translate-x-full');
     }
 });
+
+document.querySelectorAll(".logout").forEach((click) => {
+    click.addEventListener("click", () => {
+        const confirmed = confirm("Are you sure you want to logout?");
+        if (confirmed) {
+            window.location.href = "./index.html";
+        }
+    });
+});

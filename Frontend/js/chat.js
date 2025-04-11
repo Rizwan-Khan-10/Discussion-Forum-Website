@@ -3,13 +3,13 @@ function renderUserList(users) {
     leftPanel.innerHTML = "";
 
     users.forEach(user => {
-        const img = user.img ? user.img : "../assets/profile.png";
+        const img = user.img && user.img.trim() !== "" ? user.img : "../assets/profile.png";
         const lastMessage = user.last_message ? user.last_message : "click to chat";
 
         const userDiv = document.createElement("div");
         userDiv.className = "flex items-center justify-between gap-4 p-2 rounded hover:bg-gray-800 cursor-pointer";
         userDiv.id = user.user_id;
-        userDiv.onclick = () => openChat(user.user_id, user.username, user.img);
+        userDiv.onclick = () => openChat(user.user_id, user.username, img);
 
         userDiv.innerHTML = `
             <div id="${user.user_id}" class="flex w-full items-center gap-4 overflow-hidden">
