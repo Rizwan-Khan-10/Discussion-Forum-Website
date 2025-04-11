@@ -1,12 +1,16 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql import func, desc
+from sqlalchemy import and_, cast, Integer
 from models.post import Post
 from models.user import User
+from models.bookmark import Bookmark
+from models.followThread import FollowThread
 from models.userProfile import UserProfile
 from models.category import Category
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
 from pydantic import BaseModel
+from sqlalchemy.orm import joinedload
 import datetime
 import uuid
 import os
@@ -117,7 +121,7 @@ async def create_post(request: PostRequest, postImage: UploadFile, db: Session):
         if user_profile:
             decrypted = DecryptionMiddleware.decrypt({
                 "total_posts": user_profile.total_posts or EncryptionMiddleware.encrypt({"temp": "0"})["temp"],
-                "reputation": user_profile.reputation or EncryptionMiddleware.encrypt({"temp": "0"})["temp"]
+                "reputation": user_profile.reputation or EncryptionMiddleware.encrypt({"temp": "0"})["temp"],
             })
 
             total_posts = int(decrypted.get("total_posts") or 0) + 1
@@ -154,7 +158,8 @@ def serialize_post(post):
         "shared": post.shared,
         "report": post.report,
         "followed": post.followed,
-        "views": post.views
+        "views": post.views,
+        "img": post.user_profile.img if post.user_profile else None,
     })
 
     return {
@@ -173,7 +178,8 @@ def serialize_post(post):
         "followed": decrypted.get("followed"),
         "views": decrypted.get("views"),
         "created_at": post.created_at.isoformat() if post.created_at else None,
-        "image_url": post.image_url
+        "image_url": post.image_url,
+        "img": decrypted.get("img"),
     }
 
 async def get_post_by_id(user_id: str, db: Session):
@@ -182,8 +188,11 @@ async def get_post_by_id(user_id: str, db: Session):
         if not user:
             raise APIError(status_code=404, detail="User not found.")
         
+        user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
+
         decrypted_user = DecryptionMiddleware.decrypt({
-            "username": user.username
+            "username": user.username,
+            "img": user_profile.img
         })
 
         posts = db.query(Post).filter(Post.user_id == user_id).all()
@@ -235,7 +244,8 @@ async def get_post_by_id(user_id: str, db: Session):
                 "is_pinned": post.is_pinned,
                 "is_locked": post.is_locked,
                 "timestamp": show_date,
-                "edited": edited
+                "edited": edited,
+                "img": decrypted_user["img"],
             }
 
             result.append(post_data)
@@ -328,21 +338,6 @@ async def delete_post(post_id: str, user_id: str, username: str, db: Session):
         db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-async def get_posts(category_id: str = None, db: Session = None):
-    try:
-        query = db.query(Post)
-
-        if category_id:
-            query = query.filter(Post.category_id == category_id)
-
-        posts = query.order_by(func.random()).limit(10).all()  
-        if not posts:
-            raise APIError(status_code=404, detail="No posts found.")
-
-        return APIResponse.success(data=posts, message="Posts retrieved successfully.")
-
-    except Exception as e:
-        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 async def edit_post(request: EditRequest, postImage: UploadFile, db: Session):
     try:
@@ -483,3 +478,294 @@ async def count_view(post_id: str, user_id: str, db: Session):
     except Exception as e:
         db.rollback()
         raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+async def get_bookmarked_posts(user_id: str, db: Session):
+    try:
+        user = db.query(User).filter_by(user_id=user_id).first()
+        if not user:
+            raise APIError(status_code=404, detail="User not found.")
+
+        bookmarks = (
+            db.query(Bookmark)
+            .options(joinedload(Bookmark.post))
+            .filter(Bookmark.user_id == user_id)
+            .order_by(Bookmark.time.desc())
+            .all()
+        )
+
+        post_list = []
+        for bookmark in bookmarks:
+            post = bookmark.post
+
+            decrypted_post = DecryptionMiddleware.decrypt({
+                "title": post.title,
+                "content": post.content,
+                "tags": post.tags,
+                "upvotes": post.upvotes,
+                "downvotes": post.downvotes,
+                "comment_count": post.comment_count,
+                "bookmark_count": post.bookmark_count,
+                "shared": post.shared,
+                "report": post.report,
+                "followed": post.followed,
+                "views": post.views,
+            })
+
+            user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
+
+            decrypted_user = DecryptionMiddleware.decrypt({
+                "username": user.username,
+                "image_url": post.image_url,
+                "img": user_profile.img
+            }) 
+
+            category_name = post.category.category_name 
+
+            created_at = post.created_at.isoformat() if post.created_at else None
+            updated_at = post.updated_at.isoformat() if post.updated_at else None
+            show_date = created_at if created_at == updated_at else updated_at
+            edited = created_at == updated_at
+
+            post_list.append({
+                "post_id": post.post_id,
+                "user_id": post.user_id,
+                "username": decrypted_user.get("username"),
+                "image_url": decrypted_user.get("image_url"),
+                "title": decrypted_post.get("title"),
+                "content": decrypted_post.get("content"),
+                "category_id": post.category_id,
+                "tags": decrypted_post.get("tags"),
+                "upvotes": decrypted_post.get("upvotes"),
+                "downvotes": decrypted_post.get("downvotes"),
+                "comment_count": decrypted_post.get("comment_count"),
+                "bookmark_count": decrypted_post.get("bookmark_count"),
+                "shared": decrypted_post.get("shared"),
+                "report": decrypted_post.get("report"),
+                "followed": decrypted_post.get("followed"),
+                "views": decrypted_post.get("views"),
+                "created_at": created_at,
+                "updated_at": updated_at,
+                "show_date": show_date,
+                "edited": edited,
+                "category_id": post.category_id,
+                "category_name": category_name,
+                "img": decrypted_user.get("img"),
+            })
+
+        return APIResponse.success(data=post_list, message="Bookmarked posts retrieved successfully.")
+
+    except Exception as e:
+        import traceback
+        print("Error in get_bookmarked_posts:", traceback.format_exc())
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+async def get_followThread_posts(user_id: str, db: Session):
+    try:
+        user = db.query(User).filter_by(user_id=user_id).first()
+        if not user:
+            raise APIError(status_code=404, detail="User not found.")
+
+        followedThread = (
+            db.query(FollowThread)
+            .options(joinedload(FollowThread.post))
+            .filter(FollowThread.user_id == user_id)
+            .order_by(FollowThread.time.desc())
+            .all()
+        )
+
+        post_list = []
+        for bookmark in followedThread:
+            post = bookmark.post
+
+            decrypted_post = DecryptionMiddleware.decrypt({
+                "title": post.title,
+                "content": post.content,
+                "tags": post.tags,
+                "upvotes": post.upvotes,
+                "downvotes": post.downvotes,
+                "comment_count": post.comment_count,
+                "bookmark_count": post.bookmark_count,
+                "shared": post.shared,
+                "report": post.report,
+                "followed": post.followed,
+                "views": post.views,
+            })
+
+            user_profile = db.query(UserProfile).filter_by(user_id=user_id).first()
+
+            decrypted_user = DecryptionMiddleware.decrypt({
+                "username": user.username,
+                "image_url": post.image_url,
+                "img": user_profile.img
+            }) 
+
+            category_name = post.category.category_name 
+
+            created_at = post.created_at.isoformat() if post.created_at else None
+            updated_at = post.updated_at.isoformat() if post.updated_at else None
+            show_date = created_at if created_at == updated_at else updated_at
+            edited = created_at == updated_at
+
+            post_list.append({
+                "post_id": post.post_id,
+                "user_id": post.user_id,
+                "username": decrypted_user.get("username"),
+                "image_url": decrypted_user.get("image_url"),
+                "title": decrypted_post.get("title"),
+                "content": decrypted_post.get("content"),
+                "category_id": post.category_id,
+                "tags": decrypted_post.get("tags"),
+                "upvotes": decrypted_post.get("upvotes"),
+                "downvotes": decrypted_post.get("downvotes"),
+                "comment_count": decrypted_post.get("comment_count"),
+                "bookmark_count": decrypted_post.get("bookmark_count"),
+                "shared": decrypted_post.get("shared"),
+                "report": decrypted_post.get("report"),
+                "followed": decrypted_post.get("followed"),
+                "views": decrypted_post.get("views"),
+                "created_at": created_at,
+                "updated_at": updated_at,
+                "show_date": show_date,
+                "edited": edited,
+                "category_id": post.category_id,
+                "category_name": category_name,
+                "img": decrypted_user.get("img"),
+            })
+
+        message = "Followed thread posts retrieved successfully." if post_list else "No followed thread posts yet."
+        return APIResponse.success(data=post_list, message=message)
+
+    except Exception as e:
+        import traceback
+        print("Error in get_followThread_posts:", traceback.format_exc())
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+def safe_decrypt_int(key, value):
+    try:
+        decrypted = DecryptionMiddleware.decrypt({key: value}).get(key)
+        return int(decrypted) if decrypted and str(decrypted).isdigit() else 0
+    except Exception:
+        return 0
+
+async def fetch_popular_content(db: Session):
+    try:
+        category_map_reverse = {
+            "General Discussion": "general", "Announcements": "announcements",
+            "Questions & Answers": "questions", "Feedback & Suggestions": "feedback",
+            "Technical Support": "support", "Guides & Tutorials": "guides",
+            "Projects & Showcases": "projects", "Career / Jobs / Internships": "career",
+            "Events / Meetups": "events", "News & Updates": "news",
+            "Web Development": "webdev", "App Development": "appdev",
+            "Game Development": "gamedev", "AI & Machine Learning": "ai_ml",
+            "Cybersecurity": "cybersecurity", "Open Source": "opensource",
+            "Programming Help": "programming", "College / Academics": "college",
+            "Lifestyle & Wellness": "lifestyle", "Memes / Fun": "fun", "Off Topic": "offtopic"
+        }
+
+        categories = db.query(Category).all()
+        if not categories:
+            return APIResponse.success(data={}, message="No categories found.")
+
+        result = {}
+        all_recent_posts = []
+        three_days_ago = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)
+
+        for category in categories:
+            category_identifier = category_map_reverse.get(category.category_name)
+            if not category_identifier:
+                continue
+
+            posts = db.query(Post).filter(
+                Post.category_id == category.category_id
+            ).order_by(desc(Post.created_at)).limit(20).all()
+
+            result[category_identifier] = [
+                serialize_post_for_frontend(post, db) for post in posts
+            ]
+
+            all_recent_posts.extend(db.query(Post).filter(
+                Post.category_id == category.category_id,
+                Post.created_at >= three_days_ago
+            ).all())
+
+        most_viewed = sorted(
+            all_recent_posts,
+            key=lambda post: safe_decrypt_int("views", post.views),
+            reverse=True
+        )[:20]
+
+        result["MostViewed"] = [
+            serialize_post_for_frontend(post, db) for post in most_viewed
+        ]
+
+        most_liked = sorted(
+            all_recent_posts,
+            key=lambda post: safe_decrypt_int("upvotes", post.upvotes),
+            reverse=True
+        )[:20]
+
+        result["MostLiked"] = [
+            serialize_post_for_frontend(post, db) for post in most_liked
+        ]
+
+        top_user_profile = db.query(UserProfile).order_by(
+            desc(UserProfile.reputation)
+        ).first()
+
+        top_user_posts = []
+        if top_user_profile:
+            top_user = db.query(User).filter(User.user_id == top_user_profile.user_id).first()
+            if top_user:
+                top_user_posts = db.query(Post).filter(
+                    Post.user_id == top_user.user_id,
+                    Post.created_at >= three_days_ago
+                ).order_by(desc(Post.created_at)).limit(20).all()
+
+        result["TopReputationPosts"] = [
+            serialize_post_for_frontend(post, db, top_user_profile) for post in top_user_posts
+        ]
+
+        return APIResponse.success(data=result, message="Popular content fetched.")
+    except Exception as e:
+        raise APIError(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+def serialize_post_for_frontend(post, db: Session, user_profile=None):
+    decrypted = DecryptionMiddleware.decrypt({
+        "title": post.title,
+        "content": post.content,
+        "tags": post.tags,
+        "upvotes": post.upvotes,
+        "downvotes": post.downvotes,
+        "comment_count": post.comment_count,
+        "bookmark_count": post.bookmark_count,
+        "shared": post.shared,
+        "report": post.report,
+        "followed": post.followed,
+        "views": post.views,
+        "image_url": post.image_url,
+    })
+    user = db.query(User).filter(User.user_id == post.user_id).first()
+    profile = user_profile if user_profile else db.query(UserProfile).filter(UserProfile.user_id == post.user_id).first()
+    decrypted_profile = DecryptionMiddleware.decrypt({"img": profile.img}) if profile else {"img": None}
+
+    return {
+        "post_id": post.post_id,
+        "user_id": post.user_id,
+        "username": DecryptionMiddleware.decrypt({"username": user.username}).get("username") if user else None,
+        "title": decrypted.get("title"),
+        "content": decrypted.get("content"),
+        "category_id": post.category_id,
+        "category_name": post.category.category_name if post.category else None,  # <-- updated here
+        "tags": decrypted.get("tags"),
+        "upvotes": decrypted.get("upvotes"),
+        "downvotes": decrypted.get("downvotes"),
+        "comment_count": decrypted.get("comment_count"),
+        "bookmark_count": decrypted.get("bookmark_count"),
+        "shared": decrypted.get("shared"),
+        "report": decrypted.get("report"),
+        "followed": decrypted.get("followed"),
+        "views": decrypted.get("views"),
+        "created_at": post.created_at.isoformat() if post.created_at else None,
+        "image_url": decrypted.get("image_url"),
+        "img": decrypted_profile.get("img"),
+    }

@@ -21,14 +21,12 @@ async def addToBookmark(post_id: str, user_id: str, db: Session):
 
         existing_bookmark = db.query(Bookmark).filter_by(post_id=post_id, user_id=user_id).first()
 
-        # Decrypt bookmark_count
         decrypted = DecryptionMiddleware.decrypt({
             "bookmark_count": post.bookmark_count or EncryptionMiddleware.encrypt({"bookmark_count": "0"})["bookmark_count"]
         })
         current_count = int(decrypted.get("bookmark_count", "0"))
 
         if existing_bookmark:
-            # Remove bookmark
             db.delete(existing_bookmark)
             new_count = max(0, current_count - 1)
 
@@ -41,7 +39,6 @@ async def addToBookmark(post_id: str, user_id: str, db: Session):
             db.commit()
             return APIResponse.success(message="Bookmark removed.")
         else:
-            # Add bookmark
             new_bookmark = Bookmark(post_id=post_id, user_id=user_id, time=datetime.utcnow())
             db.add(new_bookmark)
 
@@ -72,7 +69,6 @@ async def getBookmark(post_id: str, user_id: str, db: Session):
 
         is_bookmarked = bool(bookmark)
 
-        # Decrypt bookmark count
         decrypted = DecryptionMiddleware.decrypt({
             "bookmark_count": post.bookmark_count or EncryptionMiddleware.encrypt({"bookmark_count": "0"})["bookmark_count"]
         })

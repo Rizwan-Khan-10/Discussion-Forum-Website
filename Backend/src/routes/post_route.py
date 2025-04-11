@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from db.connection import get_db
 from controllers.post_controller import (
     create_post, get_post_by_id,
-    pin_post, lock_post, edit_post, get_posts,delete_post, count_view
+    pin_post, lock_post, edit_post, fetch_popular_content, delete_post, count_view, get_bookmarked_posts ,get_followThread_posts
 )
 from controllers.post_controller import PostRequest
 from pydantic import BaseModel
@@ -35,6 +35,9 @@ class DeleteAction(BaseModel):
     post_id: str
     user_id: str 
     username: str  
+
+class SavedPostRequest(BaseModel):
+    user_id: str
 
 @post_router.post("/addPost")
 async def create_post_api(
@@ -72,9 +75,17 @@ async def lock_post_api(post_action: PostAction, db: Session = Depends(get_db)):
 async def delete_post_api(delete_action: DeleteAction, db: Session = Depends(get_db)):
     return await delete_post(delete_action.post_id, delete_action.user_id, delete_action.username, db)
 
-@post_router.get("/posts")
-async def get_random_or_category_posts_api(category_id: str = None, db: Session = Depends(get_db)):
-    return await get_posts(category_id, db)
+@post_router.post("/getBookmark")
+async def get_bookmarked_posts_api(request: SavedPostRequest, db: Session = Depends(get_db)):
+    return await get_bookmarked_posts(request.user_id, db)
+
+@post_router.post("/getFollowedThread")
+async def get_followedThread_posts_api(request: SavedPostRequest, db: Session = Depends(get_db)):
+    return await get_followThread_posts(request.user_id, db)
+
+@post_router.get("/Explore")
+async def get_post_in_category_api(db: Session = Depends(get_db)):
+    return await fetch_popular_content(db)
 
 @post_router.post("/editPost")
 async def edit_post_api(

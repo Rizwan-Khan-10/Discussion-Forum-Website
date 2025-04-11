@@ -12,8 +12,8 @@ class FollowRequest(BaseModel):
 
 @follow_router.post("/follow")
 async def follow(request: FollowRequest, db: Session = Depends(get_db)):
-    return await follow_user(request, db)
+    return await follow_user(request.user_id, request.follow_id, db)
 
 @follow_router.post("/unfollow")
 async def unfollow(request: FollowRequest, db: Session = Depends(get_db)):
-    return await unfollow_user(request, db)
+    return await unfollow_user(request.user_id, request.follow_id, db)

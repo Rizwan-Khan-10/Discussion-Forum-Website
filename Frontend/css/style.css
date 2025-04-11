@@ -18,14 +18,12 @@
     --color-green-300: oklch(0.871 0.15 154.449);
     --color-green-400: oklch(0.792 0.209 151.711);
     --color-green-500: oklch(0.723 0.219 149.579);
-    --color-green-600: oklch(0.627 0.194 149.214);
     --color-emerald-300: oklch(0.845 0.143 164.978);
     --color-emerald-400: oklch(0.765 0.177 163.223);
     --color-teal-300: oklch(0.855 0.138 181.071);
     --color-teal-400: oklch(0.777 0.152 181.912);
     --color-teal-500: oklch(0.704 0.14 182.503);
     --color-teal-600: oklch(0.6 0.118 184.704);
-    --color-cyan-400: oklch(0.789 0.154 211.53);
     --color-cyan-600: oklch(0.609 0.126 221.723);
     --color-sky-300: oklch(0.828 0.111 230.318);
     --color-blue-300: oklch(0.809 0.105 251.813);
@@ -454,6 +452,9 @@
   .h-11 {
     height: calc(var(--spacing) * 11);
   }
+  .h-12 {
+    height: calc(var(--spacing) * 12);
+  }
   .h-24 {
     height: calc(var(--spacing) * 24);
   }
@@ -495,6 +496,9 @@
   }
   .w-11 {
     width: calc(var(--spacing) * 11);
+  }
+  .w-12 {
+    width: calc(var(--spacing) * 12);
   }
   .w-24 {
     width: calc(var(--spacing) * 24);
@@ -558,9 +562,6 @@
   }
   .max-w-xl {
     max-width: var(--container-xl);
-  }
-  .min-w-\[18rem\] {
-    min-width: 18rem;
   }
   .min-w-\[44px\] {
     min-width: 44px;
@@ -786,12 +787,6 @@
   }
   .bg-gray-950 {
     background-color: var(--color-gray-950);
-  }
-  .bg-green-600 {
-    background-color: var(--color-green-600);
-  }
-  .bg-red-600 {
-    background-color: var(--color-red-600);
   }
   .bg-slate-900 {
     background-color: var(--color-slate-900);
@@ -1037,9 +1032,6 @@
   .text-blue-500 {
     color: var(--color-blue-500);
   }
-  .text-cyan-400 {
-    color: var(--color-cyan-400);
-  }
   .text-cyan-600 {
     color: var(--color-cyan-600);
   }
@@ -1094,6 +1086,9 @@
   .text-red-500 {
     color: var(--color-red-500);
   }
+  .text-red-600 {
+    color: var(--color-red-600);
+  }
   .text-rose-300 {
     color: var(--color-rose-300);
   }
@@ -1117,6 +1112,9 @@
   }
   .text-yellow-400 {
     color: var(--color-yellow-400);
+  }
+  .capitalize {
+    text-transform: capitalize;
   }
   .placeholder-gray-400 {
     &::placeholder {

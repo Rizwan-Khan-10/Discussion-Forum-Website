@@ -14,17 +14,20 @@ window.addEventListener("DOMContentLoaded", function () {
 
     const html = `
         <div class="w-full relative">
-    <img src="${postData.image_url}" onerror="this.onerror=null;this.src='../assets/profile.png';" alt="Image" class="rounded-xl mb-3 sm:mb-4 w-full max-h-72 object-cover border-b">
+    <img src="${postData.image_url}" onerror="this.onerror=null;this.src='../assets/post.png';" alt="Image" class="rounded-xl mb-3 sm:mb-4 w-full max-h-72 object-cover border-b">
     ${editedBadge}
     <h2 class="text-lg sm:text-xl font-bold mb-2 break-words px-6">${postData.title}</h2>
     <p class="text-gray-300 mb-4 text-sm sm:text-base leading-relaxed break-words px-6">
         ${postData.content}
     </p>
     <div class="flex flex-wrap justify-between items-center text-xs sm:text-sm text-gray-400 mb-4 px-6">
+    <div class="flex justify-center items-center gap-4 profile-div" data-id="${postData.user_id}">
+        <img class="w-12 h-12 rounded-full" src="${postData.img}" onerror="this.onerror=null;this.src='../assets/profile.png';" alt="profile">
         <div class="break-words">
             Posted by <span class="text-blue-400 font-medium">@${postData.username}</span><br>
             <span class="text-gray-500">${date}, ${time}</span>
         </div>
+    </div>
         <div class="flex gap-3 mt-2 sm:mt-0">
             <span class="text-red-500 hover:text-red-600 text-base">
                 <i class="fa-solid fa-flag"></i>
@@ -418,15 +421,15 @@ async function addToFollowThread(postId, type) {
             let count = document.getElementById("followed-count").innerText;
             count = parseInt(count) - 1;
             document.getElementById("followed-count").innerText = formatCount(count);
-            document.getElementById("followed-icon").classList.remove("fa-regular");
-            document.getElementById("followed-icon").classList.add("fa-solid");
+            document.getElementById("followed-icon").classList.remove("fa-solid");
+            document.getElementById("followed-icon").classList.add("fa-regular");
         }
         if (responseData.message === "Thread followed.") {
             let count = document.getElementById("followed-count").innerText;
             count = parseInt(count) + 1;
             document.getElementById("followed-count").innerText = formatCount(count);
-            document.getElementById("followed-icon").classList.remove("fa-solid");
-            document.getElementById("followed-icon").classList.add("fa-regular");
+            document.getElementById("followed-icon").classList.remove("fa-regular");
+            document.getElementById("followed-icon").classList.add("fa-solid");
         }
     } catch (error) {
         console.error("Error adding vote:", error);
@@ -645,6 +648,11 @@ document.addEventListener("click", function (e) {
         const replyContainer = document.getElementById(`reply-container-${id}`);
         replyContainer.classList.toggle("hidden");
         addReplyInput(replyContainer, id);
+    }
+
+    if (e.target.closest(".profile-div")) {
+        const id = e.target.closest(".profile-div").dataset.id;
+        window.location.href = "./profile.html?id=" + id;
     }
 });
 

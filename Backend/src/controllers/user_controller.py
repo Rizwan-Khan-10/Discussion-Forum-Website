@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from models.userProfile import UserProfile
 from models.user import User
+from models.follow import Follower
 from utils.ApiError import APIError
 from utils.ApiResponse import APIResponse
 from pydantic import BaseModel
@@ -22,11 +23,13 @@ class UserProfileRequest(BaseModel):
 async def get_user_profile(user_id: str, db: Session):
     try:
         matched_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+        user = db.query(User).filter(User.user_id == user_id).first()
 
-        if not matched_profile:
+        if not matched_profile or not user:
             raise APIError(status_code=404, detail="User profile not found.")
 
         decrypted_data = DecryptionMiddleware.decrypt({
+            "username": user.username,
             "bio": matched_profile.bio,
             "img": matched_profile.img,
             "blockUser": matched_profile.blockUser,
@@ -43,8 +46,12 @@ async def get_user_profile(user_id: str, db: Session):
             "total_views": matched_profile.total_views,
         })
 
+        follower_records = db.query(Follower).filter(Follower.user_id == user_id).all()
+        follower_ids = [follower.follower_id for follower in follower_records]
+
         response_data = {
             "user_id": user_id,
+            "username": decrypted_data.get("username"),
             "bio": decrypted_data.get("bio"),
             "img": decrypted_data.get("img"),
             "blockUser": decrypted_data.get("blockUser"),
@@ -59,6 +66,7 @@ async def get_user_profile(user_id: str, db: Session):
             "total_bookmarks": decrypted_data.get("total_bookmarks"),
             "total_shares": decrypted_data.get("total_shares"),
             "total_views": decrypted_data.get("total_views"),
+            "follower_ids": follower_ids  
         }
 
         return APIResponse.success(data=response_data, message="User profile retrieved successfully.")

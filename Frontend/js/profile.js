@@ -32,8 +32,13 @@ usernameInput.addEventListener("input", function () {
 document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("selectedPost");
     localStorage.removeItem("userPosts");
-    getProfile();
-    fetchUserPosts();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("id")) {
+        getIdFromUrlAndClean();
+    } else {
+        getProfile();
+        fetchUserPosts();
+    }
 })
 
 buttons.forEach((btn) => {
@@ -160,16 +165,22 @@ async function getProfile() {
 
         const data = await response.json();
         if (data.data !== "") {
-            document.getElementById("profileUsername").innerText = sessionStorage.getItem("username");
+            document.getElementById("follow-user").dataset.userId = data.data.user_id;
+            document.getElementById("profileUsername").innerText = data.data.username;
             document.getElementById("profileBio").innerText = data.data.bio || defaultBio;
-            document.getElementById("followers-count").innerText = data.data.followers;
-            document.getElementById("following-count").innerText = data.data.following;
-            document.getElementById("reputation-count").innerText = data.data.reputation;
-            document.getElementById("posts-count").innerText = data.data.total_posts;
-            document.getElementById("upvotes-count").innerText = data.data.total_upvotes;
-            document.getElementById("downvotes-count").innerText = data.data.total_downvotes;
-            document.getElementById("view-count").innerText = data.data.total_views;
-            document.getElementById("bookmark-count").innerText = data.data.total_bookmarks;
+            document.getElementById("followers-count").innerText = formatCount(data.data.followers);
+            document.getElementById("following-count").innerText = formatCount(data.data.following);
+            document.getElementById("reputation-count").innerText = formatCount(data.data.reputation);
+            document.getElementById("posts-count").innerText = formatCount(data.data.total_posts);
+            document.getElementById("upvotes-count").innerText = formatCount(data.data.total_upvotes);
+            document.getElementById("downvotes-count").innerText = formatCount(data.data.total_downvotes);
+            document.getElementById("view-count").innerText = formatCount(data.data.total_views);
+            document.getElementById("bookmark-count").innerText = formatCount(data.data.total_bookmarks);
+            if (data.data.follower_ids && data.data.follower_ids.includes(sessionStorage.getItem("userId"))) {
+                document.getElementById("follow-user").innerText = "Unfollow";
+            } else {
+                document.getElementById("follow-user").innerText = "Follow";
+            }
             if (data.data.img) {
                 document.getElementById("profileImg").src = data.data.img;
             } else {
@@ -236,7 +247,7 @@ function displayPosts(postList) {
 }
 
 function createPostCard(postData) {
-    const imageUrl = postData.image_url ? postData.image_url : "../assets/profile.png";
+    const imageUrl = postData.image_url ? postData.image_url : "../assets/post.png";
 
     const timestamp = new Date(postData.timestamp);
     const date = timestamp.toLocaleDateString();
@@ -327,32 +338,33 @@ function createPostCard(postData) {
                 </p>
             </div>
             <div class="mt-4 flex justify-between text-gray-300 border-t border-gray-600 pt-3">
-                <span class="flex items-center gap-1 text-sm hover:text-yellow-300 cursor-pointer">
-                    <i class="fa-regular fa-bookmark text-yellow-300 text-xs"></i><span>${postData.bookmark_count}</span>
-                </span>
-                <span class="flex items-center gap-1 text-sm cursor-pointer">
-                    <i class="fa-solid fa-share-alt text-lime-300 text-xs"></i><span>${postData.shared}</span>
-                </span>
-                <span class="flex items-center gap-1 text-sm cursor-pointer">
-                    <i class="fa-regular fa-square-plus text-purple-500 text-xs"></i><span>${postData.followed}</span>
-                </span>
-                <span class="flex items-center gap-1 text-sm cursor-pointer">
-                    <i class="fa-regular fa-flag text-red-300 text-xs"></i>
-                </span>
-            </div>
-            <div class="flex justify-between text-sm text-gray-300 mt-4 border-t border-gray-600 pt-3">
-                <div class="flex items-center gap-1 text-xs">
-                    <i class="fa-solid fa-up-long text-green-400"></i><span>${postData.upvotes}</span>
-                </div>
-                <div class="flex items-center gap-1 text-xs">
-                    <i class="fa-solid fa-down-long text-red-400"></i><span>${postData.downvotes}</span>
-                </div>
-                <div class="flex items-center gap-1 text-xs">
-                    <i class="fa-regular fa-eye text-emerald-400"></i><span>${postData.views}</span>
-                </div>
-                <div class="flex items-center gap-1 text-xs">
-                    <i class="fa-regular fa-comment text-blue-400"></i><span>${postData.comment_count}</span>
-                </div>
+    <span class="flex items-center gap-1 text-sm hover:text-yellow-300 cursor-pointer">
+        <i class="fa-solid fa-bookmark text-yellow-300 text-xs"></i><span>${formatCount(postData.bookmark_count)}</span>
+    </span>
+    <span class="flex items-center gap-1 text-sm cursor-pointer">
+        <i class="fa-solid fa-share-alt text-lime-300 text-xs"></i><span>${formatCount(postData.shared)}</span>
+    </span>
+    <span class="flex items-center gap-1 text-sm cursor-pointer">
+        <i class="fa-solid fa-square-plus text-purple-500 text-xs"></i><span>${formatCount(postData.followed)}</span>
+    </span>
+    <span class="flex items-center gap-1 text-sm cursor-pointer">
+        <i class="fa-solid fa-flag text-red-600 text-xs"></i>
+    </span>
+</div>
+<div class="flex justify-between text-sm text-gray-300 mt-4 border-t border-gray-600 pt-3">
+    <div class="flex items-center gap-1 text-xs">
+        <i class="fa-solid fa-thumbs-up text-green-400"></i><span>${formatCount(postData.upvotes)}</span>
+    </div>
+    <div class="flex items-center gap-1 text-xs">
+        <i class="fa-solid fa-thumbs-down text-red-400"></i><span>${formatCount(postData.downvotes)}</span>
+    </div>
+    <div class="flex items-center gap-1 text-xs">
+        <i class="fa-solid fa-eye text-emerald-400"></i><span>${formatCount(postData.views)}</span>
+    </div>
+    <div class="flex items-center gap-1 text-xs">
+        <i class="fa-solid fa-comment text-blue-400"></i><span>${formatCount(postData.comment_count)}</span>
+    </div>
+</div>
             </div>
         </div>
     `;
@@ -718,3 +730,276 @@ document.getElementById("editPostForm").addEventListener("submit", async (e) => 
     }
     PostID = "";
 });
+
+async function fetchUserBookmark() {
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) return alert("User ID not found in session.");
+
+    try {
+        const response = await fetch("http://localhost:8000/post/getBookmark", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id: userId })
+        });
+
+        const data = await response.json();
+        if (data.data !== "") {
+            localStorage.setItem("bookmarkPosts", JSON.stringify(data.data));
+            const storedPosts = JSON.parse(localStorage.getItem("bookmarkPosts"));
+            displayPosts(storedPosts);
+        }
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+    }
+}
+
+async function fetchUserFollowedThread() {
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) return alert("User ID not found in session.");
+
+    try {
+        const response = await fetch("http://localhost:8000/post/getFollowedThread", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id: userId })
+        });
+
+        const data = await response.json();
+        if (data.data !== "") {
+            localStorage.setItem("FollowedThread", JSON.stringify(data.data));
+            const storedPosts = JSON.parse(localStorage.getItem("FollowedThread"));
+            displayPosts(storedPosts);
+        }
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+    }
+}
+
+showPost.addEventListener("click", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("id")) {
+        try {
+            const response = await fetch("http://localhost:8000/post/getPost", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: urlParams.get("id") })
+            });
+
+            const data = await response.json();
+            if (data.data !== "") {
+                localStorage.setItem("userPosts", JSON.stringify(data.data));
+                const storedPosts = JSON.parse(localStorage.getItem("userPosts"));
+                displayPosts(storedPosts);
+            }
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+        }
+    } else {
+        fetchUserPosts();
+    }
+});
+
+showBookmark.addEventListener("click", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("id")) {
+        try {
+            const response = await fetch("http://localhost:8000/post/getBookmark", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: urlParams.get("id") })
+            });
+
+            const data = await response.json();
+            if (data.data !== "") {
+                localStorage.setItem("bookmarkPosts", JSON.stringify(data.data));
+                const storedPosts = JSON.parse(localStorage.getItem("bookmarkPosts"));
+                displayPosts(storedPosts);
+            }
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+        }
+    } else {
+        fetchUserBookmark();
+    }
+});
+
+showFollowed.addEventListener("click", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("id")) {
+        try {
+            const response = await fetch("http://localhost:8000/post/getFollowedThread", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: urlParams.get("id") })
+            });
+
+            const data = await response.json();
+            if (data.data !== "") {
+                localStorage.setItem("FollowedThread", JSON.stringify(data.data));
+                const storedPosts = JSON.parse(localStorage.getItem("FollowedThread"));
+                displayPosts(storedPosts);
+            }
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+        }
+    } else {
+        fetchUserFollowedThread();
+    }
+});
+
+function formatCount(num) {
+    if (num >= 1_000_000) {
+        return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    } else if (num >= 1_000) {
+        return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+    } else {
+        return num.toString();
+    }
+}
+
+async function getIdFromUrlAndClean() {
+    const url = new URL(window.location.href);
+    const id = url.searchParams.get("id");
+    try {
+        const response = await fetch("http://localhost:8000/post/getPost", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id: id })
+        });
+
+        const data = await response.json();
+        if (data.data !== "") {
+            localStorage.setItem("userPosts", JSON.stringify(data.data));
+            const storedPosts = JSON.parse(localStorage.getItem("userPosts"));
+            displayPosts(storedPosts);
+        }
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+    }
+    try {
+        const response = await fetch("http://localhost:8000/profile/get", {
+            method: "GET",
+            headers: {
+                "user-id": id,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.data !== "") {
+            document.getElementById("follow-user").dataset.userId = data.data.user_id;
+            document.getElementById("profileUsername").innerText = data.data.username;
+            document.getElementById("profileBio").innerText = data.data.bio || defaultBio;
+            document.getElementById("followers-count").innerText = formatCount(data.data.followers);
+            document.getElementById("following-count").innerText = formatCount(data.data.following);
+            document.getElementById("reputation-count").innerText = formatCount(data.data.reputation);
+            document.getElementById("posts-count").innerText = formatCount(data.data.total_posts);
+            document.getElementById("upvotes-count").innerText = formatCount(data.data.total_upvotes);
+            document.getElementById("downvotes-count").innerText = formatCount(data.data.total_downvotes);
+            document.getElementById("view-count").innerText = formatCount(data.data.total_views);
+            document.getElementById("bookmark-count").innerText = formatCount(data.data.total_bookmarks);
+            if (data.data.follower_ids && data.data.follower_ids.includes(sessionStorage.getItem("userId"))) {
+                document.getElementById("follow-user").innerText = "Unfollow";
+            } else {
+                document.getElementById("follow-user").innerText = "Follow";
+            }
+            if (data.data.img) {
+                document.getElementById("profileImg").src = data.data.img;
+            } else {
+                document.getElementById("profileImg").src = defaultImage;
+            }
+            myDiv.id = data.data.user_id;
+            if (myDiv.id === sessionStorage.getItem("userId")) {
+                document.getElementById("followDiv").classList.remove("flex");
+                document.getElementById("followDiv").classList.add("hidden");
+                document.getElementById("editDiv").classList.remove("hidden");
+                document.getElementById("editDiv").classList.add("flex");
+            } else {
+                document.getElementById("followDiv").classList.remove("hidden");
+                document.getElementById("followDiv").classList.add("flex");
+                document.getElementById("editDiv").classList.remove("flex");
+                document.getElementById("editDiv").classList.add("hidden");
+            }
+        }
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+    }
+    return id;
+}
+
+document.getElementById("follow-user").addEventListener("click", async (event) => {
+    event.preventDefault();
+    const follow_id = document.getElementById("follow-user").getAttribute("data-user-id");
+    const user_id = sessionStorage.getItem("userId");
+    if (document.getElementById("follow-user").innerText === "Follow") {
+        sendFollowRequest(user_id, follow_id);
+    } else {
+        sendUnfollowRequest(user_id, follow_id);
+    }
+});
+
+async function sendFollowRequest(userId, followId) {
+    try {
+        const response = await fetch("http://localhost:8000/follow/follow", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                follow_id: followId
+            })
+        });
+
+        const result = await response.json();
+        if (result.message) {
+            let count = document.getElementById("followers-count").innerText;
+            count = parseInt(count) + 1;
+            document.getElementById("followers-count").innerText = formatCount(count);
+            document.getElementById("follow-user").innerText = "Unfollow";
+        }
+    } catch (error) {
+        console.error("Error while following:", error);
+    }
+}
+
+async function sendUnfollowRequest(userId, followId) {
+    try {
+        const response = await fetch("http://localhost:8000/follow/unfollow", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                follow_id: followId
+            })
+        });
+
+        const result = await response.json();
+        if (result.message) {
+            let count = document.getElementById("followers-count").innerText;
+            count = parseInt(count) - 1;
+            document.getElementById("followers-count").innerText = formatCount(count);
+            document.getElementById("follow-user").innerText = "Follow";
+        }
+    } catch (error) {
+        console.error("Error while unfollowing:", error);
+    }
+}
